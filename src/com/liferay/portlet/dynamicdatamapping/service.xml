@@ -1,0 +1,202 @@
+<?xml version="1.0"?>
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 6.1.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_6_1_0.dtd">
+
+<service-builder package-path="com.liferay.portlet.dynamicdatamapping">
+	<namespace>DDM</namespace>
+	<entity name="DDMContent" uuid="true" local-service="true" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="contentId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="name" type="String" localized="true" />
+		<column name="description" type="String" />
+		<column name="xml" type="String" />
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
+		</finder>
+		<finder name="CompanyId" return-type="Collection">
+			<finder-column name="companyId" />
+		</finder>
+	</entity>
+	<entity name="DDMStorageLink" uuid="true" local-service="true" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="storageLinkId" type="long" primary="true" />
+
+		<!-- Other fields -->
+
+		<column name="classNameId" type="long" />
+		<column name="classPK" type="long" />
+		<column name="structureId" type="long" />
+
+		<!-- Finder methods -->
+
+		<finder name="ClassPK" return-type="DDMStorageLink" unique="true">
+			<finder-column name="classPK" />
+		</finder>
+		<finder name="StructureId" return-type="Collection">
+			<finder-column name="structureId" />
+		</finder>
+	</entity>
+	<entity name="DDMStructure" uuid="true" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="structureId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="classNameId" type="long" />
+		<column name="structureKey" type="String" />
+		<column name="name" type="String" localized="true" />
+		<column name="description" type="String" localized="true" />
+		<column name="xsd" type="String" />
+		<column name="storageType" type="String" />
+		<column name="type" type="int" />
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
+		</finder>
+		<finder name="ClassNameId" return-type="Collection">
+			<finder-column name="classNameId" />
+		</finder>
+		<finder name="G_S" return-type="DDMStructure" unique="true">
+			<finder-column name="groupId" />
+			<finder-column name="structureKey" />
+		</finder>
+		<finder name="G_N_D" return-type="Collection" db-index="false">
+			<finder-column name="groupId" />
+			<finder-column name="name" />
+			<finder-column name="description" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portlet.documentlibrary" entity="DLFileEntryType" />
+	</entity>
+	<entity name="DDMStructureLink" local-service="true" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="structureLinkId" type="long" primary="true" />
+
+		<!-- Other fields -->
+
+		<column name="classNameId" type="long" />
+		<column name="classPK" type="long" />
+		<column name="structureId" type="long" />
+
+		<!-- Finder methods -->
+
+		<finder name="ClassNameId" return-type="Collection">
+			<finder-column name="classNameId" />
+		</finder>
+		<finder name="ClassPK" return-type="DDMStorageLink" unique="true">
+			<finder-column name="classPK" />
+		</finder>
+		<finder name="StructureId" return-type="Collection">
+			<finder-column name="structureId" />
+		</finder>
+	</entity>
+	<entity name="DDMTemplate" uuid="true" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="templateId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="structureId" type="long" />
+		<column name="name" type="String" localized="true" />
+		<column name="description" type="String" localized="true" />
+		<column name="type" type="String" />
+		<column name="mode" type="String" />
+		<column name="language" type="String" />
+		<column name="script" type="String" />
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
+		</finder>
+		<finder name="StructureId" return-type="Collection">
+			<finder-column name="structureId" />
+		</finder>
+		<finder name="Type" return-type="Collection">
+			<finder-column name="type" />
+		</finder>
+		<finder name="Language" return-type="Collection">
+			<finder-column name="language" />
+		</finder>
+		<finder name="S_T" return-type="Collection">
+			<finder-column name="structureId" />
+			<finder-column name="type" />
+		</finder>
+		<finder name="S_T_M" return-type="Collection">
+			<finder-column name="structureId" />
+			<finder-column name="type" />
+			<finder-column name="mode" />
+		</finder>
+	</entity>
+	<exceptions>
+		<exception>Content</exception>
+		<exception>ContentName</exception>
+		<exception>ContentXml</exception>
+		<exception>RequiredStructure</exception>
+		<exception>Storage</exception>
+		<exception>StorageFieldName</exception>
+		<exception>StorageFieldRequired</exception>
+		<exception>StructureDuplicateElement</exception>
+		<exception>StructureDuplicateStructureKey</exception>
+		<exception>StructureField</exception>
+		<exception>StructureName</exception>
+		<exception>StructureXsd</exception>
+		<exception>TemplateName</exception>
+		<exception>TemplateScript</exception>
+	</exceptions>
+</service-builder>

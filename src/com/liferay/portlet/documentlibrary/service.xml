@@ -1,0 +1,574 @@
+<?xml version="1.0"?>
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 6.1.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_6_1_0.dtd">
+
+<service-builder package-path="com.liferay.portlet.documentlibrary">
+	<namespace>DL</namespace>
+	<entity name="DLApp" local-service="true" remote-service="true">
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portal" entity="Lock" />
+		<reference package-path="com.liferay.portal" entity="Repository" />
+		<reference package-path="com.liferay.portal" entity="RepositoryEntry" />
+
+		<!-- Transactions -->
+
+		<tx-required>getFileAsStream</tx-required>
+	</entity>
+	<entity name="DLAppHelper" local-service="true" remote-service="false">
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portal" entity="Group" />
+		<reference package-path="com.liferay.portal" entity="Image" />
+		<reference package-path="com.liferay.portal" entity="Lock" />
+		<reference package-path="com.liferay.portal" entity="Layout" />
+		<reference package-path="com.liferay.portal" entity="WebDAVProps" />
+		<reference package-path="com.liferay.portal" entity="WorkflowInstanceLink" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetCategory" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetEntry" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetLink" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetTag" />
+		<reference package-path="com.liferay.portlet.expando" entity="ExpandoValue" />
+		<reference package-path="com.liferay.portlet.messageboards" entity="MBDiscussion" />
+		<reference package-path="com.liferay.portlet.messageboards" entity="MBMessage" />
+		<reference package-path="com.liferay.portlet.ratings" entity="RatingsEntry" />
+		<reference package-path="com.liferay.portlet.ratings" entity="RatingsStats" />
+		<reference package-path="com.liferay.portlet.social" entity="SocialActivity" />
+	</entity>
+	<entity name="DLContent" human-name="document library content" local-service="true" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="contentId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+
+		<!-- Other fields -->
+
+		<column name="repositoryId" type="long" />
+		<column name="path" type="String" />
+		<column name="version" type="String" />
+		<column name="data" type="Blob" />
+		<column name="size" type="long" />
+
+		<!-- Order -->
+
+		<order by="desc">
+			<order-column name="version" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="C_R" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="repositoryId" />
+		</finder>
+		<finder name="C_R_P" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="repositoryId" />
+			<finder-column name="path" />
+		</finder>
+		<finder name="C_R_LikeP" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="repositoryId" />
+			<finder-column name="path" comparator="LIKE" />
+		</finder>
+		<finder name="C_R_P_V" return-type="DLContent" unique="true">
+			<finder-column name="companyId" />
+			<finder-column name="repositoryId" />
+			<finder-column name="path" />
+			<finder-column name="version" />
+		</finder>
+	</entity>
+	<entity name="DLFileEntry" human-name="document library file entry" uuid="true" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="fileEntryId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="versionUserId" type="long" />
+		<column name="versionUserName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="repositoryId" type="long" />
+		<column name="folderId" type="long" />
+		<column name="name" type="String" />
+		<column name="extension" type="String" />
+		<column name="mimeType" type="String" />
+		<column name="title" type="String" />
+		<column name="description" type="String" />
+		<column name="extraSettings" type="String" />
+		<column name="fileEntryTypeId" type="long" />
+		<column name="version" type="String" />
+		<column name="size" type="long" />
+		<column name="readCount" type="int" />
+		<column name="smallImageId" type="long" />
+		<column name="largeImageId" type="long" />
+		<column name="custom1ImageId" type="long" />
+		<column name="custom2ImageId" type="long" />
+
+		<!-- Order -->
+
+		<order by="asc">
+			<order-column name="folderId" />
+			<order-column name="name" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
+		</finder>
+		<finder name="CompanyId" return-type="Collection">
+			<finder-column name="companyId" />
+		</finder>
+		<finder name="G_U" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="userId" />
+		</finder>
+		<finder name="G_F" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="folderId" arrayable-operator="OR" />
+		</finder>
+		<finder name="G_U_F" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="userId" />
+			<finder-column name="folderId" arrayable-operator="OR" />
+		</finder>
+		<finder name="G_F_N" return-type="DLFileEntry" unique="true">
+			<finder-column name="groupId" />
+			<finder-column name="folderId" />
+			<finder-column name="name" />
+		</finder>
+		<finder name="G_F_T" return-type="DLFileEntry" unique="true">
+			<finder-column name="groupId" />
+			<finder-column name="folderId" />
+			<finder-column name="title" />
+		</finder>
+		<finder name="G_F_F" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="folderId" arrayable-operator="OR" />
+			<finder-column name="fileEntryTypeId" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portal" entity="Image" />
+		<reference package-path="com.liferay.portal" entity="Lock" />
+		<reference package-path="com.liferay.portal" entity="WebDAVProps" />
+		<reference package-path="com.liferay.portal" entity="WorkflowInstanceLink" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetCategory" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetEntry" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetLink" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetTag" />
+		<reference package-path="com.liferay.portlet.dynamicdatamapping" entity="DDMStructure" />
+		<reference package-path="com.liferay.portlet.expando" entity="ExpandoValue" />
+
+		<!-- Transactions -->
+
+		<tx-required>getFileAsStream</tx-required>
+	</entity>
+	<entity name="DLFileEntryMetadata" human-name="document library file entry metadata" uuid="true" local-service="true" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="fileEntryMetadataId" type="long" primary="true" />
+
+		<!-- Other fields -->
+
+		<column name="DDMStorageId" type="long" />
+		<column name="DDMStructureId" type="long" />
+		<column name="fileEntryTypeId" type="long" />
+		<column name="fileEntryId" type="long" />
+		<column name="fileVersionId" type="long" />
+
+		<!-- Finder methods -->
+
+		<finder name="FileEntryTypeId" return-type="Collection">
+			<finder-column name="fileEntryTypeId" />
+		</finder>
+		<finder name="FileEntryId" return-type="Collection">
+			<finder-column name="fileEntryId" />
+		</finder>
+		<finder name="FileVersionId" return-type="Collection">
+			<finder-column name="fileVersionId" />
+		</finder>
+		<finder name="D_F" return-type="DLFileEntryMetadata" unique="true">
+			<finder-column name="DDMStructureId" />
+			<finder-column name="fileVersionId" />
+		</finder>
+		<finder name="F_V" return-type="DLFileEntryMetadata">
+			<finder-column name="fileEntryId" />
+			<finder-column name="fileVersionId" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portlet.dynamicdatamapping" entity="DDMStructureLink" />
+	</entity>
+	<entity name="DLFileEntryType" human-name="document library file entry type" uuid="true" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="fileEntryTypeId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="name" type="String" />
+		<column name="description" type="String" />
+
+		<!-- Relationships -->
+
+		<column name="folders" type="Collection" entity="DLFolder" mapping-table="DLFileEntryTypes_DLFolders" />
+		<column name="ddmStructure" type="Collection" entity="com.liferay.portlet.dynamicdatamapping.DDMStructure" mapping-table="DLFileEntryTypes_DDMStructures" />
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" arrayable-operator="OR" />
+		</finder>
+		<finder name="G_N" return-type="DLFileEntryType" unique="true">
+			<finder-column name="groupId" />
+			<finder-column name="name" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portal" entity="WorkflowDefinitionLink" />
+		<reference package-path="com.liferay.portal" entity="WorkflowInstanceLink" />
+		<reference package-path="com.liferay.portlet.dynamicdatamapping" entity="DDMStructure" />
+	</entity>
+	<entity name="DLFileRank" human-name="document library file rank" local-service="true" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="fileRankId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="createDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="fileEntryId" type="long" />
+
+		<!-- Order -->
+
+		<order by="desc">
+			<order-column name="createDate" />
+		</order>
+
+		<!-- Finders -->
+
+		<finder name="UserId" return-type="Collection">
+			<finder-column name="userId" />
+		</finder>
+		<finder name="FileEntryId" return-type="Collection">
+			<finder-column name="fileEntryId" />
+		</finder>
+		<finder name="G_U" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="userId" />
+		</finder>
+		<finder name="C_U_F" return-type="DLFileRank" unique="true">
+			<finder-column name="companyId" />
+			<finder-column name="userId" />
+			<finder-column name="fileEntryId" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portal" entity="Layout" />
+	</entity>
+	<entity name="DLFileShortcut" human-name="document library file shortcut" uuid="true" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="fileShortcutId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="repositoryId" type="long" />
+		<column name="folderId" type="long" />
+		<column name="toFileEntryId" type="long" />
+		<column name="status" type="int" />
+		<column name="statusByUserId" type="long" />
+		<column name="statusByUserName" type="String" />
+		<column name="statusDate" type="Date" />
+
+		<!-- Finder methods -->
+
+		<finder name="ToFileEntryId" return-type="Collection">
+			<finder-column name="toFileEntryId" />
+		</finder>
+		<finder name="G_F" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="folderId" />
+		</finder>
+		<finder name="G_F_S" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="folderId" />
+			<finder-column name="status" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portlet.asset" entity="AssetEntry" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetTag" />
+	</entity>
+	<entity name="DLFileVersion" human-name="document library file version" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="fileVersionId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="repositoryId" type="long" />
+		<column name="folderId" type="long" />
+		<column name="fileEntryId" type="long" />
+		<column name="extension" type="String" />
+		<column name="mimeType" type="String" />
+		<column name="title" type="String" />
+		<column name="description" type="String" />
+		<column name="changeLog" type="String" />
+		<column name="extraSettings" type="String" />
+		<column name="fileEntryTypeId" type="long" />
+		<column name="version" type="String" />
+		<column name="size" type="long" />
+		<column name="status" type="int" />
+		<column name="statusByUserId" type="long" />
+		<column name="statusByUserName" type="String" />
+		<column name="statusDate" type="Date" />
+
+		<!-- Order -->
+
+		<order by="desc">
+			<order-column name="fileEntryId" />
+			<order-column name="createDate" />
+		</order>
+
+		<!-- Finders -->
+
+		<finder name="FileEntryId" return-type="Collection">
+			<finder-column name="fileEntryId" />
+		</finder>
+		<finder name="F_V" return-type="DLFileVersion" unique="true">
+			<finder-column name="fileEntryId" />
+			<finder-column name="version" />
+		</finder>
+		<finder name="F_S" return-type="Collection">
+			<finder-column name="fileEntryId" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="G_F_S" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="folderId" />
+			<finder-column name="status" />
+		</finder>
+	</entity>
+	<entity name="DLFolder" human-name="document library folder" uuid="true" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="folderId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="repositoryId" type="long" />
+		<column name="mountPoint" type="boolean" />
+		<column name="parentFolderId" type="long" />
+		<column name="name" type="String" />
+		<column name="description" type="String" />
+		<column name="lastPostDate" type="Date" />
+		<column name="defaultFileEntryTypeId" type="long" />
+		<column name="overrideFileEntryTypes" type="boolean" />
+
+		<!-- Relationships -->
+
+		<column name="fileEntryTypes" type="Collection" entity="DLFileEntryType" mapping-table="DLFileEntryTypes_DLFolders" />
+
+		<!-- Order -->
+
+		<order by="asc">
+			<order-column name="parentFolderId" />
+			<order-column name="name" case-sensitive="false" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
+		</finder>
+		<finder name="CompanyId" return-type="Collection">
+			<finder-column name="companyId" />
+		</finder>
+		<finder name="RepositoryId" return-type="DLFolder">
+			<finder-column name="repositoryId" />
+		</finder>
+		<finder name="G_P" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="parentFolderId" />
+		</finder>
+		<finder name="P_N" return-type="Collection">
+			<finder-column name="parentFolderId" />
+			<finder-column name="name" />
+		</finder>
+		<finder name="G_P_M" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="parentFolderId" />
+			<finder-column name="mountPoint" />
+		</finder>
+		<finder name="G_P_N" return-type="DLFolder" unique="true">
+			<finder-column name="groupId" />
+			<finder-column name="parentFolderId" />
+			<finder-column name="name" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portal" entity="Group" />
+		<reference package-path="com.liferay.portal" entity="Lock" />
+		<reference package-path="com.liferay.portal" entity="WebDAVProps" />
+		<reference package-path="com.liferay.portal" entity="WorkflowDefinitionLink" />
+		<reference package-path="com.liferay.portal" entity="WorkflowInstanceLink" />
+		<reference package-path="com.liferay.portlet.expando" entity="ExpandoValue" />
+	</entity>
+	<entity name="DLSync" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="syncId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="fileId" type="long" />
+		<column name="fileUuid" type="String" />
+		<column name="repositoryId" type="long" />
+		<column name="parentFolderId" type="long" />
+		<column name="name" type="String" />
+		<column name="event" type="String" />
+		<column name="type" type="String" />
+		<column name="version" type="String" />
+
+		<!-- Order -->
+
+		<order by="asc">
+			<order-column name="companyId" />
+			<order-column name="repositoryId" />
+			<order-column name="modifiedDate" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="FileId" return-type="DLSync" unique="true">
+			<finder-column name="fileId" />
+		</finder>
+		<finder name="C_M_R" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="modifiedDate" comparator="&gt;=" />
+			<finder-column name="repositoryId" />
+		</finder>
+		<tx-required>getFileDeltaAsStream</tx-required>
+	</entity>
+	<exceptions>
+		<exception>DirectoryName</exception>
+		<exception>DuplicateDirectory</exception>
+		<exception>DuplicateFile</exception>
+		<exception>DuplicateFileEntryType</exception>
+		<exception>DuplicateFolderName</exception>
+		<exception>DuplicateRepositoryName</exception>
+		<exception>FileExtension</exception>
+		<exception>FileMimeType</exception>
+		<exception>FileName</exception>
+		<exception>FileShortcutPermission</exception>
+		<exception>FileSize</exception>
+		<exception>FolderName</exception>
+		<exception>ImageSize</exception>
+		<exception>InvalidFileEntryType</exception>
+		<exception>NoSuchDirectory</exception>
+		<exception>NoSuchFile</exception>
+		<exception>NoSuchMetadataSet</exception>
+		<exception>RepositoryName</exception>
+		<exception>SourceFileName</exception>
+	</exceptions>
+</service-builder>

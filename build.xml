@@ -1,0 +1,1202 @@
+<?xml version="1.0"?>
+
+<project name="portal-impl" basedir="." default="compile" xmlns:antelope="antlib:ise.antelope.tasks">
+	<property name="test.properties" value="portal-test.properties" />
+
+	<import file="../build-common-java.xml" />
+
+	<property name="deploy.dir" value="${app.server.lib.portal.dir}" />
+	<property name="jar.file" value="${ant.project.name}" />
+	<property name="manifest.bundle.name" value="Liferay Portal Impl" />
+	<property name="manifest.bundle.symbolic.name" value="com.liferay.portal.impl;singleton:=true" />
+	<property name="service.file" value="service.xml" />
+
+	<target name="build-alloy-taglib">
+		<if>
+			<not>
+				<isset property="alloy.taglibs.dir" />
+			</not>
+			<then>
+				<fail>
+.
+
+Please set the property "alloy.taglibs.dir" to point to a checked out version of
+svn://svn.liferay.com/repos/public/alloy/trunk/sandbox/taglibs.
+				</fail>
+			</then>
+		</if>
+
+		<ant dir="${alloy.taglibs.dir}" target="clean" inheritAll="false" />
+		<ant dir="${alloy.taglibs.dir}" target="start" inheritAll="false" />
+
+		<copy todir="${project.dir}/lib/portal">
+			<fileset file="${alloy.taglibs.dir}/alloy-taglib/alloy-taglib.jar" />
+		</copy>
+	</target>
+
+	<!--<target name="build-copy-interface">
+		<java
+			classname="com.liferay.portal.tools.CopyInterfaceBuilder"
+			classpathref="project.classpath"
+			fork="true"
+			newenvironment="true"
+		>
+			<jvmarg value="-Dexternal-properties=com/liferay/portal/tools/dependencies/portal-tools.properties" />
+			<arg value="E:/Temp/SRC/jdk-1.4.2" />
+			<arg value="javax/naming/Context.java" />
+		</java>
+
+		<java
+			classname="com.liferay.portal.tools.CopyInterfaceBuilder"
+			classpathref="project.classpath"
+			fork="true"
+			newenvironment="true"
+		>
+			<jvmarg value="-Dexternal-properties=com/liferay/portal/tools/dependencies/portal-tools.properties" />
+			<arg value="E:/Temp/SRC/jdk-1.4.2" />
+			<arg value="javax/naming/directory/DirContext.java" />
+		</java>
+	</target>-->
+
+    <target name="build-creole-parser">
+		<delete>
+			<fileset
+				dir="src/com/liferay/portal/parsers/creole/parser"
+				includes="*.*"
+			/>
+		</delete>
+
+		<path id="antlr.classpath">
+			<pathelement path="${classpath}" />
+			<fileset dir="${project.dir}/lib/portal" includes="antlr2.jar,antlr3.jar,antlr3-runtime.jar,stringtemplate.jar" />
+		</path>
+
+		<java
+			classname="org.antlr.Tool"
+			classpathref="antlr.classpath"
+			fork="true"
+			maxmemory="1024m"
+			newenvironment="true"
+		>
+			<arg value="-o" />
+			<arg path="src/com/liferay/portal/parsers/creole/parser" />
+			<arg path="src/com/liferay/portal/parsers/creole/grammar/Creole10.g" />
+		</java>
+
+        <replace file="src/com/liferay/portal/parsers/creole/parser/Creole10Lexer.java">
+			<replacetoken>public class Creole10Lexer</replacetoken>
+			<replacevalue><![CDATA[@SuppressWarnings("all")
+public class Creole10Lexer]]></replacevalue>
+        </replace>
+
+		<replace file="src/com/liferay/portal/parsers/creole/parser/Creole10Parser.java">
+			<replacetoken>public class Creole10Parser</replacetoken>
+			<replacevalue><![CDATA[@SuppressWarnings("all")
+public class Creole10Parser]]></replacevalue>
+        </replace>
+
+        <fixcrlf
+			includes="*.java"
+			javafiles="yes"
+			srcdir="src/com/liferay/portal/parsers/creole/parser"
+			tab="add"
+		/>
+    </target>
+
+	<target name="build-css">
+		<ant dir="../portal-web" target="build-css" />
+	</target>
+
+	<target name="build-db">
+		<ant dir="../sql" target="build-db" />
+	</target>
+
+	<target name="build-icu4j">
+		<tstamp>
+			<format property="tstamp.value" pattern="yyyyMMddkkmmssSSS" />
+		</tstamp>
+
+		<unzip src="${project.dir}/tools/icu4j-4_0_1-src.jar" dest="${tstamp.value}" />
+
+		<move file="${tstamp.value}/src/com/ibm" todir="${tstamp.value}/src/com/liferay" />
+
+		<replace dir="${tstamp.value}" includes="build.xml,**/*.java,**/*.properties">
+			<replacefilter token="com.ibm" value="com.liferay.ibm" />
+			<replacefilter token="com/ibm" value="com/liferay/ibm" />
+		</replace>
+
+		<replace file="${tstamp.value}/build.xml">
+			<replacetoken><![CDATA[<unjar src="${icudatajar.file}" dest="${build.dir}" />]]></replacetoken>
+			<replacevalue><![CDATA[<unjar src="${icudatajar.file}" dest="${build.dir}" />
+	<move file="classes/com/ibm" todir="classes/com/liferay" />]]></replacevalue>
+		</replace>
+
+		<!--
+		Use exec because of a bug with com.liferay.ibm.icu.dev.tool.index.IndexGenerator
+		not picking up the correct base directory.
+
+		<ant dir="${tstamp.value}" target="core" inheritAll="false" />
+		<ant dir="${tstamp.value}" target="jar" inheritAll="false" />-->
+
+		<exec dir="${tstamp.value}" executable="cmd.exe" os="${os.windows}">
+			<arg line="/c ant core jar" />
+		</exec>
+
+		<move file="${tstamp.value}/icu4j.jar" tofile="${project.dir}/lib/portal/liferay-icu4j.jar.new" />
+
+		<delete dir="${tstamp.value}" />
+	</target>
+
+	<target name="build-iw">
+		<java
+			classname="com.liferay.portal.tools.InstanceWrapperBuilder"
+			classpathref="project.classpath"
+			fork="true"
+			newenvironment="true"
+		>
+			<jvmarg value="-Dexternal-properties=com/liferay/portal/tools/dependencies/portal-tools.properties" />
+			<arg value="src/com/liferay/portal/tools/instance_wrappers.xml" />
+		</java>
+	</target>
+
+	<target name="build-json-java">
+		<tstamp>
+			<format property="tstamp.value" pattern="yyyyMMddkkmmssSSS" />
+		</tstamp>
+
+		<get
+			dest="json-java.zip"
+			src="https://github.com/douglascrockford/JSON-java/zipball/master"
+		/>
+
+		<unzip
+			dest="${tstamp.value}/org/json"
+			src="json-java.zip"
+		>
+			<patternset
+				includes="**/*.java"
+			/>
+			<flattenmapper />
+		</unzip>
+
+		<delete file="json-java.zip" />
+
+		<antcall target="compile-java">
+			<param name="javac.classpathref" value="project.classpath" />
+			<param name="javac.destdir" value="${tstamp.value}" />
+			<param name="javac.srcdir" value="${tstamp.value}" />
+		</antcall>
+
+		<zip destfile="${project.dir}/lib/portal/json-java.jar">
+			<zipfileset
+				dir="${tstamp.value}"
+			/>
+		</zip>
+
+		<delete dir="${tstamp.value}" />
+	</target>
+
+	<target name="build-lang">
+		<antcall target="build-lang-cmd">
+			<param name="lang.dir" value="src/content" />
+			<param name="lang.file" value="Language" />
+		</antcall>
+	</target>
+
+	<target name="build-lang-cmd">
+		<java
+			classname="com.liferay.portal.tools.LangBuilder"
+			classpathref="project.classpath"
+			fork="true"
+			newenvironment="true"
+		>
+			<jvmarg value="-Dexternal-properties=com/liferay/portal/tools/dependencies/portal-tools.properties" />
+			<jvmarg value="-Dfile.encoding=UTF-8" />
+			<jvmarg value="-Duser.country=US" />
+			<jvmarg value="-Duser.language=en" />
+			<arg value="lang.dir=${lang.dir}" />
+			<arg value="lang.file=${lang.file}" />
+			<arg value="lang.plugin=false" />
+			<arg value="lang.translate=true" />
+		</java>
+
+		<copy file="${lang.dir}/${lang.file}.properties" tofile="${lang.dir}/${lang.file}_en.properties" />
+	</target>
+
+	<target name="build-lib-versions">
+		<java
+			classname="com.liferay.portal.tools.XSLTBuilder"
+			classpathref="project.classpath"
+			fork="true"
+			newenvironment="true"
+		>
+			<jvmarg value="-Dexternal-properties=com/liferay/portal/tools/dependencies/portal-tools.properties" />
+			<arg value="${project.dir}/lib/versions.xml" />
+			<arg value="${project.dir}/lib/versions.xsl" />
+			<arg value="${project.dir}/lib/versions.html" />
+		</java>
+	</target>
+
+	<target name="build-liferay-doclet">
+		<property name="liferay.doclet.dir" value="${project.dir}/tools/liferay-doclet" />
+		<property name="jdk.src.dir" value="${liferay.doclet.dir}/jdk-src" />
+
+		<mkdir dir="${jdk.src.dir}/src" />
+
+		<if>
+			<not>
+				<available file="${jdk.src.dir}/jdk-src.jar" />
+			</not>
+			<then>
+				<get
+					dest="${jdk.src.dir}/jdk-src.jar"
+					src="http://www.java.net/download/jdk6/6u21/promoted/b05/jdk-6u21-ea-src-b05-jrl-29_may_2010.jar"
+					verbose="true"
+				/>
+			</then>
+		</if>
+
+		<if>
+			<not>
+				<available file="${jdk.src.dir}/src/j2se/src/share/classes/com/sun/tools/doclets/internal/toolkit/util/SourceToHTMLConverter.java" />
+			</not>
+			<then>
+				<echo>You will now be prompted to accept the JDK license agreement. Accept it, and then extract the source code into ${jdk.src.dir}/src.</echo>
+
+				<java jar="${jdk.src.dir}/jdk-src.jar" fork="true" failonerror="true" />
+			</then>
+		</if>
+
+		<if>
+			<not>
+				<available file="${jdk.src.dir}/src/j2se/src/share/classes/com/sun/tools/doclets/internal/toolkit/util/SourceToHTMLConverter.java" />
+			</not>
+			<then>
+				<fail>The JDK source code is either incompatible or extracted incorrectly.</fail>
+			</then>
+		</if>
+
+		<delete dir="${liferay.doclet.dir}/src" />
+
+		<mkdir dir="${liferay.doclet.dir}/src/com/liferay/tools" />
+
+		<copy todir="${liferay.doclet.dir}/src/com/liferay/tools/doclets">
+			<fileset dir="${jdk.src.dir}/src/j2se/src/share/classes/com/sun/tools/doclets" />
+		</copy>
+
+		<replace dir="${liferay.doclet.dir}/src">
+			<replacefilter token="com.sun.tools" value="com.liferay.tools" />
+		</replace>
+
+		<patch
+			failonerror="true"
+			originalfile="${liferay.doclet.dir}/src/com/liferay/tools/doclets/internal/toolkit/util/SourceToHTMLConverter.java"
+			patchfile="${project.dir}/tools/liferay-doclet.patch"
+		/>
+
+		<mkdir dir="${liferay.doclet.dir}/classes" />
+
+		<copy todir="${liferay.doclet.dir}/classes">
+			<fileset dir="${liferay.doclet.dir}/src" excludes="**/*.java" />
+			<fileset file="${jdk.src.dir}/src/JavaResearchLicense.txt" />
+		</copy>
+
+		<javac
+			classpathref="project.classpath"
+			compiler="${javac.compiler}"
+			debug="${javac.debug}"
+			deprecation="${javac.deprecation}"
+			destdir="${liferay.doclet.dir}/classes"
+			encoding="${javac.encoding}"
+			includeAntRuntime="false"
+			nowarn="${javac.nowarn}"
+			srcdir="${liferay.doclet.dir}/src"
+		/>
+
+		<jar
+			basedir="${liferay.doclet.dir}/classes"
+			destfile="${liferay.doclet.dir}/liferay-doclet.jar"
+		/>
+
+		<copy file="${liferay.doclet.dir}/liferay-doclet.jar" todir="${project.dir}/lib/development" />
+	</target>
+
+	<target name="build-releaseinfo" if="release.info">
+		<java
+			classname="com.liferay.portal.tools.ReleaseInfoBuilder"
+			classpathref="project.classpath"
+			fork="true"
+			newenvironment="true"
+		>
+			<jvmarg value="-Dexternal-properties=com/liferay/portal/tools/dependencies/portal-tools.properties" />
+		</java>
+	</target>
+
+	<target name="build-ruby-gems">
+		<tstamp>
+			<format property="tstamp.value" pattern="yyyyMMddkkmmssSSS" />
+		</tstamp>
+
+		<mkdir dir="${tstamp.value}/compass" />
+
+		<get
+			dest="${tstamp.value}/compass/compass-0.11.5.gem"
+			src="http://rubygems.org/downloads/compass-0.11.5.gem"
+		/>
+
+		<java
+			fork="true"
+			jar="${project.dir}/lib/portal/jruby.jar"
+		>
+			<arg line="-S gem install -i ./${tstamp.value}/output ${tstamp.value}/compass/compass-0.11.5.gem --no-rdoc --no-ri" />
+		</java>
+
+		<mkdir dir="${tstamp.value}/sass" />
+
+		<get
+			dest="${tstamp.value}/sass/sass-3.1.7.gem"
+			src="http://rubygems.org/downloads/sass-3.1.7.gem"
+		/>
+
+		<java
+			fork="true"
+			jar="${project.dir}/lib/portal/jruby.jar"
+		>
+			<arg line="-S gem install -i ./${tstamp.value}/output ${tstamp.value}/sass/sass-3.1.7.gem --no-rdoc --no-ri" />
+		</java>
+
+		<jar
+			basedir="${tstamp.value}/output"
+			jarfile="${project.dir}/lib/portal/ruby-gems.jar"
+		/>
+
+		<delete dir="${tstamp.value}" />
+	</target>
+
+	<target name="build-selenium">
+		<ant dir="../portal-web" target="build-selenium" />
+	</target>
+
+	<target name="build-selenium-server">
+		<tstamp>
+			<format property="tstamp.value" pattern="yyyyMMddkkmmssSSS" />
+		</tstamp>
+
+		<unzip
+			dest="${tstamp.value}"
+			src="${project.dir}/lib/development/selenium-server.jar"
+		>
+			<patternset
+				excludes="org/json/**"
+			/>
+		</unzip>
+
+		<copy file="${project.dir}/tools/selenium/user-extensions.js" todir="${tstamp.value}/core/scripts" overwrite="true" />
+
+		<zip basedir="${tstamp.value}" destfile="${project.dir}/lib/development/selenium-server.jar.new" />
+
+		<delete dir="${tstamp.value}" />
+	</target>
+
+	<target name="build-service">
+		<java
+			classname="com.liferay.portal.tools.servicebuilder.ServiceBuilder"
+			classpathref="project.classpath"
+		>
+			<arg value="-Dexternal-properties=com/liferay/portal/tools/dependencies/portal-tools.properties" />
+			<arg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger" />
+			<arg value="service.input.file=${service.file}" />
+			<arg value="service.hbm.file=${basedir}/src/META-INF/portal-hbm.xml" />
+			<arg value="service.orm.file=${basedir}/src/META-INF/portal-orm.xml" />
+			<arg value="service.model.hints.file=${basedir}/src/META-INF/portal-model-hints.xml" />
+			<arg value="service.spring.file=${basedir}/src/META-INF/portal-spring.xml" />
+			<arg value="service.api.dir=${basedir}/../portal-service/src" />
+			<arg value="service.impl.dir=${basedir}/src" />
+			<arg value="service.json.file=${basedir}/../portal-web/docroot/html/js/liferay/service.js" />
+			<arg value="service.remoting.file=${basedir}/../portal-web/docroot/WEB-INF/remoting-servlet.xml" />
+			<arg value="service.sql.dir=${basedir}/../sql" />
+			<arg value="service.sql.file=portal-tables.sql" />
+			<arg value="service.sql.indexes.file=indexes.sql" />
+			<arg value="service.sql.indexes.properties.file=indexes.properties" />
+			<arg value="service.sql.sequences.file=sequences.sql" />
+			<arg value="service.bean.locator.util=com.liferay.portal.kernel.bean.PortalBeanLocatorUtil" />
+			<arg value="service.props.util=com.liferay.portal.util.PropsUtil" />
+			<arg value="service.test.dir=${basedir}/test" />
+		</java>
+
+		<delete file="ServiceBuilder.temp" />
+
+		<ant dir="../portal-service" target="compile" inheritAll="false" />
+	</target>
+
+	<target name="build-service-counter">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/counter/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portal">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portal/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-announcements">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/announcements/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-asset">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/asset/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-blogs">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/blogs/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-bookmarks">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/bookmarks/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-calendar">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/calendar/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-documentlibrary">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/documentlibrary/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-dynamicdatalists">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/dynamicdatalists/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-dynamicdatamapping">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/dynamicdatamapping/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-expando">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/expando/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-flags">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/flags/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-journal">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/journal/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-messageboards">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/messageboards/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-mobiledevicerules">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/mobiledevicerules/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-polls">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/polls/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-ratings">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/ratings/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-shopping">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/shopping/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-social">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/social/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-softwarecatalog">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/softwarecatalog/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-test">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/test/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlet-wiki">
+		<antcall target="build-service">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/wiki/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-service-portlets">
+		<antcall target="build-service-portlet-announcements" />
+		<antcall target="build-service-portlet-asset" />
+		<antcall target="build-service-portlet-blogs" />
+		<antcall target="build-service-portlet-bookmarks" />
+		<antcall target="build-service-portlet-calendar" />
+		<antcall target="build-service-portlet-documentlibrary" />
+		<antcall target="build-service-portlet-dynamicdatalists" />
+		<antcall target="build-service-portlet-dynamicdatamapping" />
+		<antcall target="build-service-portlet-expando" />
+		<antcall target="build-service-portlet-flags" />
+		<antcall target="build-service-portlet-journal" />
+		<antcall target="build-service-portlet-messageboards" />
+		<antcall target="build-service-portlet-mobiledevicerules" />
+		<antcall target="build-service-portlet-polls" />
+		<antcall target="build-service-portlet-ratings" />
+		<antcall target="build-service-portlet-shopping" />
+		<antcall target="build-service-portlet-social" />
+		<antcall target="build-service-portlet-softwarecatalog" />
+		<antcall target="build-service-portlet-wiki" />
+	</target>
+
+	<target name="build-services">
+		<antcall target="build-service-counter" />
+		<antcall target="build-service-portal" />
+		<antcall target="build-service-portlets" />
+	</target>
+
+	<target name="build-themes">
+		<ant dir="../portal-web" target="build-themes" />
+	</target>
+
+	<target name="build-upgrade-table">
+		<if>
+			<isset property="upgrade.table.dir" />
+			<then>
+				<for param="zip.file">
+					<path>
+						<fileset
+							dir="${upgrade.table.dir}"
+							includes="*.zip"
+						/>
+					</path>
+					<sequential>
+						<antelope:stringutil string="@{zip.file}" property="zip.version.beginindex">
+							<indexof string="src-" fromindex="0" />
+						</antelope:stringutil>
+
+						<math
+							datatype="int"
+							operand1="${zip.version.beginindex}"
+							operand2="4"
+							operation="+"
+							result="zip.version.beginindex"
+						/>
+
+						<antelope:stringutil string="@{zip.file}" property="zip.version.endindex">
+							<indexof string=".zip" fromindex="0" />
+						</antelope:stringutil>
+
+						<antelope:stringutil string="@{zip.file}" property="zip.version">
+							<substring beginindex="${zip.version.beginindex}" endindex="${zip.version.endindex}" />
+						</antelope:stringutil>
+
+						<if>
+							<or>
+								<not>
+									<uptodate
+										srcfile="@{zip.file}"
+										targetfile="${upgrade.table.dir}/${zip.version}"
+									/>
+								</not>
+								<not>
+									<available file="${upgrade.table.dir}/${zip.version}/indexes.sql" />
+								</not>
+							</or>
+							<then>
+								<mkdir dir="${upgrade.table.dir}/${zip.version}" />
+
+								<unzip src="@{zip.file}" dest="${upgrade.table.dir}/${zip.version}">
+									<patternset>
+										<include name="**/*ModelImpl.java" />
+										<include name="**/sql/indexes.sql" />
+									</patternset>
+									<mapper type="flatten" />
+								</unzip>
+							</then>
+						</if>
+					</sequential>
+				</for>
+
+				<java
+					classname="com.liferay.portal.tools.UpgradeTableBuilder"
+					classpathref="project.classpath"
+					fork="true"
+					newenvironment="true"
+				>
+					<arg value="${upgrade.table.dir}" />
+				</java>
+			</then>
+		</if>
+	</target>
+
+	<target name="build-velocity">
+		<tstamp>
+			<format property="tstamp.value" pattern="yyyyMMddkkmmssSSS" />
+		</tstamp>
+
+		<unzip src="${project.dir}/tools/velocity-1.6.3.zip" dest="${tstamp.value}" />
+
+		<replace file="${tstamp.value}/velocity-1.6.3/src/java/org/apache/velocity/Template.java">
+			<replacetoken><![CDATA[BufferedReader br = new BufferedReader( new InputStreamReader( is, encoding ) );]]></replacetoken>
+			<replacevalue></replacevalue>
+		</replace>
+
+		<replace file="${tstamp.value}/velocity-1.6.3/src/java/org/apache/velocity/Template.java">
+			<replacetoken><![CDATA[data = rsvc.parse( br, name);]]></replacetoken>
+			<replacevalue><![CDATA[data = rsvc.parse( new InputStreamReader( is, encoding ), name);]]></replacevalue>
+		</replace>
+
+		<ant dir="${tstamp.value}/velocity-1.6.3" antfile="build/build.xml" target="jar" inheritAll="false" />
+
+		<move file="${tstamp.value}/velocity-1.6.3/bin/velocity-1.6.3.jar" tofile="${project.dir}/lib/portal/velocity.jar.new" />
+
+		<delete dir="${tstamp.value}" />
+	</target>
+
+	<target name="build-wsdd" depends="compile">
+		<java
+			classname="com.liferay.portal.tools.WSDDBuilder"
+			classpathref="project.classpath"
+			fork="true"
+			maxmemory="512m"
+			newenvironment="true"
+		>
+			<jvmarg value="-Dexternal-properties=com/liferay/portal/tools/dependencies/portal-tools.properties" />
+			<jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger" />
+			<arg value="wsdd.output.path=src/" />
+			<arg value="wsdd.server.config.file=${basedir}/../portal-web/docroot/WEB-INF/server-config.wsdd" />
+			<arg value="wsdd.service.namespace=Portlet" />
+			<arg value="wsdd.input.file=${service.file}" />
+		</java>
+	</target>
+
+	<target name="build-wsdd-portal">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portal/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-announcements">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/announcements/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-asset">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/asset/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-blogs">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/blogs/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-bookmarks">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/bookmarks/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-calendar">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/calendar/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-documentlibrary">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/documentlibrary/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-dynamicdatalists">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/dynamicdatalists/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-dynamicdatamapping">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/dynamicdatamapping/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-expando">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/expando/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-flags">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/flags/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-journal">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/journal/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-messageboards">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/messageboards/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-mobiledevicerules">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/mobiledevicerules/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-polls">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/polls/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-ratings">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/ratings/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-shopping">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/shopping/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-social">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/social/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-softwarecatalog">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/softwarecatalog/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-test">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/test/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlet-wiki">
+		<antcall target="build-wsdd">
+			<param name="service.file" value="${basedir}/src/com/liferay/portlet/wiki/service.xml" />
+		</antcall>
+	</target>
+
+	<target name="build-wsdd-portlets">
+		<antcall target="build-wsdd-portlet-announcements" />
+		<antcall target="build-wsdd-portlet-asset" />
+		<antcall target="build-wsdd-portlet-blogs" />
+		<antcall target="build-wsdd-portlet-bookmarks" />
+		<antcall target="build-wsdd-portlet-calendar" />
+		<antcall target="build-wsdd-portlet-documentlibrary" />
+		<antcall target="build-wsdd-portlet-dynamicdatalists" />
+		<antcall target="build-wsdd-portlet-dynamicdatamapping" />
+		<antcall target="build-wsdd-portlet-expando" />
+		<antcall target="build-wsdd-portlet-flags" />
+		<antcall target="build-wsdd-portlet-journal" />
+		<antcall target="build-wsdd-portlet-messageboards" />
+		<antcall target="build-wsdd-portlet-mobiledevicerules" />
+		<antcall target="build-wsdd-portlet-polls" />
+		<antcall target="build-wsdd-portlet-ratings" />
+		<antcall target="build-wsdd-portlet-shopping" />
+		<antcall target="build-wsdd-portlet-social" />
+		<antcall target="build-wsdd-portlet-softwarecatalog" />
+		<antcall target="build-wsdd-portlet-wiki" />
+	</target>
+
+	<target name="build-wsdds">
+		<antcall target="build-wsdd-portal" />
+		<antcall target="build-wsdd-portlets" />
+	</target>
+
+	<target name="build-yui">
+		<tstamp>
+			<format property="tstamp.value" pattern="yyyyMMddkkmmssSSS" />
+		</tstamp>
+
+		<unzip src="${project.dir}/tools/rhino1_6R7.zip" dest="${tstamp.value}" />
+		<unzip src="${project.dir}/tools/yuicompressor-2.4.2.zip" dest="${tstamp.value}" />
+
+		<move todir="${tstamp.value}/rhino1_6R7/src/org">
+			<fileset dir="${tstamp.value}/yuicompressor-2.4.2/src/org" includes="**/*.java" />
+		</move>
+
+		<move file="${tstamp.value}/rhino1_6R7/deprecatedsrc/org/mozilla" todir="${tstamp.value}/rhino1_6R7/deprecatedsrc/com/liferay" />
+		<move file="${tstamp.value}/rhino1_6R7/src/org/mozilla" todir="${tstamp.value}/rhino1_6R7/src/com/liferay" />
+		<move file="${tstamp.value}/rhino1_6R7/toolsrc/org/mozilla" todir="${tstamp.value}/rhino1_6R7/toolsrc/com/liferay" />
+		<move file="${tstamp.value}/rhino1_6R7/xmlimplsrc/org/mozilla" todir="${tstamp.value}/rhino1_6R7/xmlimplsrc/com/liferay" />
+		<move file="${tstamp.value}/yuicompressor-2.4.2/src/com/yahoo" todir="${tstamp.value}/yuicompressor-2.4.2/src/com/liferay" />
+
+		<replace dir="${tstamp.value}" includes="**/build.xml,**/*.java,**/*.properties">
+			<replacefilter token="com.yahoo" value="com.liferay.yahoo" />
+			<replacefilter token="org.mozilla" value="com.liferay.mozilla" />
+			<replacefilter token="org/mozilla" value="com/liferay/mozilla" />
+		</replace>
+
+		<replace dir="${tstamp.value}/rhino1_6R7" includes="**/build.xml">
+			<replacetoken><![CDATA[includes="org/]]></replacetoken>
+			<replacevalue><![CDATA[includes="com/]]></replacevalue>
+		</replace>
+
+		<replace dir="${tstamp.value}/rhino1_6R7" includes="**/build.xml">
+			<replacetoken><![CDATA[excludes="org/]]></replacetoken>
+			<replacevalue><![CDATA[excludes="com/]]></replacevalue>
+		</replace>
+
+		<replace file="${tstamp.value}/yuicompressor-2.4.2/build.xml">
+			<replacetoken><![CDATA[<unjar src="${lib.dir}/jargs-1.0.jar" dest="${build.dir}/jar"/>]]></replacetoken>
+			<replacevalue></replacevalue>
+		</replace>
+
+		<replace file="${tstamp.value}/yuicompressor-2.4.2/build.xml">
+			<replacetoken><![CDATA[<unjar src="${lib.dir}/rhino-1.6R7.jar" dest="${build.dir}/jar"/>]]></replacetoken>
+			<replacevalue></replacevalue>
+		</replace>
+
+		<ant dir="${tstamp.value}/rhino1_6R7" target="jar" inheritAll="false" />
+
+		<copy file="${tstamp.value}/rhino1_6R7/build/rhino1_6R7/js.jar" tofile="${tstamp.value}/yuicompressor-2.4.2/lib/rhino-1.6R7.jar" />
+
+		<ant dir="${tstamp.value}/yuicompressor-2.4.2" target="build.jar" inheritAll="false" />
+
+		<move file="${tstamp.value}/rhino1_6R7/build/rhino1_6R7/js.jar" tofile="${project.dir}/lib/portal/liferay-rhino.jar.new" />
+		<move file="${tstamp.value}/yuicompressor-2.4.2/build/yuicompressor-2.4.2.jar" tofile="${project.dir}/lib/portal/liferay-yuicompressor.jar.new" />
+
+		<delete dir="${tstamp.value}" />
+	</target>
+
+	<target name="clean">
+		<delete dir="classes" />
+
+		<antcall target="build-common-java.clean" />
+	</target>
+
+	<target name="compile">
+		<if>
+			<and>
+				<equals arg1="${app.server.type}" arg2="tomcat" />
+				<antelope:endswith string="${app.server.portal.dir}" with="/portal-web/docroot" />
+			</and>
+			<then>
+				<delete file="${app.server.lib.portal.dir}/portal-impl.jar" />
+
+				<antcall target="compile-dependencies" />
+
+				<antcall target="compile-fast" />
+			</then>
+			<else>
+				<antcall target="compile-dependencies" />
+
+				<antcall target="build-common-java.compile" />
+			</else>
+		</if>
+
+		<antcall target="print-current-time" />
+	</target>
+
+	<target name="compile-dependencies">
+		<copy todir="${portal-impl.classes.dir}/com/liferay/portal/definitions">
+			<fileset dir="${project.dir}/definitions" />
+		</copy>
+
+		<copy todir="${portal-impl.classes.dir}/com/liferay/portal/deploy/dependencies">
+			<fileset
+				dir="${project.dir}/classes"
+				includes="*.properties"
+			/>
+			<fileset
+				dir="${project.dir}/portal-web/docroot/WEB-INF/tld"
+				includes="*.tld"
+			/>
+		</copy>
+
+		<copy todir="${portal-impl.classes.dir}/com/liferay/portal/tools/sql/dependencies">
+			<fileset
+				dir="${project.dir}/sql"
+				includes="portal-data-common.sql,portal-data-counter.sql,portal-data-release.sql,portal-data-sample.vm,portal-tables.sql,indexes.properties,indexes.sql,quartz-tables.sql,sequences.sql,update-*.sql"
+			/>
+		</copy>
+
+		<copy file="${project.dir}/classes/log4j.properties" todir="${portal-impl.classes.dir}" />
+		<copy file="${project.dir}/classes/logging.properties" todir="${portal-impl.classes.dir}" />
+
+		<if>
+			<not>
+				<available file="${portal-impl.classes.dir}/jamwiki.properties" />
+			</not>
+			<then>
+				<unzip
+					dest="${portal-impl.classes.dir}"
+					src="${project.dir}/tools/jamwiki-0.9.3-src.zip"
+				>
+					<patternset
+						includes="**/main/resources/ApplicationResources.properties,**/main/resources/jamwiki-configuration.xml,**/main/resources/logging.properties,**/main/resources/interwiki.properties"
+					/>
+				</unzip>
+
+				<move todir="${portal-impl.classes.dir}">
+					<fileset
+						dir="${portal-impl.classes.dir}/jamwiki-0.9.3/main/resources"
+						excludes="logging.properties"
+					/>
+				</move>
+
+				<concat destfile="${portal-impl.classes.dir}/logging.properties.new">
+					<fileset file="${portal-impl.classes.dir}/logging.properties" />
+					<fileset file="${portal-impl.classes.dir}/jamwiki-0.9.3/main/resources/logging.properties" />
+				</concat>
+
+				<move file="${portal-impl.classes.dir}/logging.properties.new" tofile="${portal-impl.classes.dir}/logging.properties" />
+
+				<delete dir="${portal-impl.classes.dir}/jamwiki-0.9.3" />
+
+				<echo file="${portal-impl.classes.dir}/jamwiki.properties">
+					database-type=com.liferay.portlet.wiki.engines.mediawiki.LiferayDataHandler
+					props-initialized=true
+					search-engine=com.liferay.portlet.wiki.engines.mediawiki.LiferaySearchEngine
+				</echo>
+			</then>
+		</if>
+
+		<copy todir="${portal-impl.classes.dir}">
+			<fileset dir="src" excludes="**/*.java" />
+		</copy>
+	</target>
+
+	<target name="compile-fast">
+		<if>
+			<and>
+				<equals arg1="${app.server.type}" arg2="tomcat" />
+				<antelope:endswith string="${app.server.portal.dir}" with="/portal-web/docroot" />
+			</and>
+			<then>
+				<javac
+					classpathref="project.classpath"
+					compiler="${javac.compiler}"
+					debug="${javac.debug}"
+					deprecation="${javac.deprecation}"
+					destdir="${app.server.classes.portal.dir}"
+					encoding="${javac.encoding}"
+					includeAntRuntime="false"
+					nowarn="${javac.nowarn}"
+					srcdir="src"
+				/>
+			</then>
+		</if>
+	</target>
+
+	<target name="compile-tools">
+		<antcall target="compile-dependencies" />
+
+		<javac
+			classpathref="project.classpath"
+			compiler="${javac.compiler}"
+			debug="${javac.debug}"
+			deprecation="${javac.deprecation}"
+			destdir="${portal-impl.classes.dir}"
+			includeAntRuntime="false"
+			includes="**/portal/tools/**"
+			nowarn="${javac.nowarn}"
+			srcdir="src"
+		/>
+	</target>
+
+	<target name="deploy">
+		<ant dir="../portal-service" target="deploy" inheritAll="false" />
+
+		<antcall target="deploy-properties" />
+
+		<if>
+			<and>
+				<equals arg1="${app.server.type}" arg2="tomcat" />
+				<antelope:endswith string="${app.server.portal.dir}" with="/portal-web/docroot" />
+			</and>
+			<then>
+				<delete file="${app.server.lib.portal.dir}/portal-impl.jar" />
+
+				<copy todir="${app.server.classes.portal.dir}/com/liferay/portal/definitions">
+					<fileset dir="${project.dir}/definitions" />
+				</copy>
+
+				<copy todir="${app.server.classes.portal.dir}">
+					<fileset dir="src" includes="**/dependencies/**,**/service.xml" />
+				</copy>
+
+				<antcall target="compile" />
+			</then>
+			<else>
+				<antcall target="build-common-java.deploy" />
+
+				<copy file="classes/log4j.properties" todir="${app.server.classes.portal.dir}" />
+				<copy file="classes/logging.properties" todir="${app.server.classes.portal.dir}" />
+			</else>
+		</if>
+	</target>
+
+	<target name="deploy-properties">
+		<ant dir=".." target="deploy-properties" inheritAll="false" />
+	</target>
+
+	<target name="format-source">
+		<copy todir="classes" overwrite="true">
+			<fileset dir="src" includes="com/liferay/portal/tools/dependencies/*.properties" />
+		</copy>
+
+		<java
+			classname="com.liferay.portal.tools.SourceFormatter"
+			classpathref="project.classpath"
+			dir="${project.dir}"
+			fork="true"
+			newenvironment="true"
+		>
+			<jvmarg value="-Xmx512m" />
+			<jvmarg value="-Dsource.formatter.excludes=${source.formatter.excludes}" />
+		</java>
+
+		<delete file="ServiceBuilder.temp" />
+	</target>
+
+	<target name="format-tld">
+		<java
+			classname="com.liferay.portal.tools.TLDFormatter"
+			classpathref="project.classpath"
+			dir="${project.dir}"
+			fork="true"
+			newenvironment="true"
+		>
+			<jvmarg value="-Dexternal-properties=com/liferay/portal/tools/dependencies/portal-tools.properties" />
+		</java>
+
+		<delete file="ServiceBuilder.temp" />
+	</target>
+
+	<target name="jar" depends="compile">
+		<ant dir="../util-bridges" target="jar" inheritAll="false" />
+		<ant dir="../util-java" target="jar" inheritAll="false" />
+		<ant dir="../util-taglib" target="jar" inheritAll="false" />
+
+		<if>
+			<not>
+				<and>
+					<equals arg1="${app.server.type}" arg2="tomcat" />
+					<antelope:endswith string="${app.server.portal.dir}" with="/portal-web/docroot" />
+				</and>
+			</not>
+			<then>
+				<antcall target="manifest" />
+
+				<jar
+					basedir="classes"
+					excludes="log4j.properties,logging.properties,portal-*.properties,system-*.properties,**/samplesqlbuilder/dependencies/*.txt"
+					jarfile="${jar.file}.jar"
+					manifest="classes/META-INF/MANIFEST.MF"
+				/>
+			</then>
+		</if>
+	</target>
+
+	<target name="rebuild-hypersonic">
+		<ant dir="../sql" target="rebuild-hypersonic" />
+	</target>
+
+	<target name="sync-plugins-git-to-svn">
+		<java
+			classname="com.liferay.portal.tools.PluginsGitSvnSyncer"
+			classpathref="project.classpath"
+			fork="true"
+			newenvironment="true"
+		>
+			<jvmarg value="-Dgit.plugins.dir=L:/projects/github/liferay-plugins-ee-6.1.x" />
+			<jvmarg value="-Dsvn.plugins.dir=L:/projects/liferay.public/plugins/6.1.x" />
+			<jvmarg value="-Dsync.to=svn" />
+		</java>
+	</target>
+
+	<target name="sync-plugins-svn-to-git">
+		<java
+			classname="com.liferay.portal.tools.PluginsGitSvnSyncer"
+			classpathref="project.classpath"
+			newenvironment="true"
+			fork="true"
+		>
+			<jvmarg value="-Dgit.plugins.dir=L:/projects/github/liferay-plugins-ee-6.1.x" />
+			<jvmarg value="-Dsvn.plugins.dir=L:/projects/liferay.public/plugins/6.1.x" />
+			<jvmarg value="-Dsync.to=git" />
+		</java>
+	</target>
+
+	<target name="tcpmon">
+		<java
+			classname="org.apache.axis.utils.tcpmon"
+			classpathref="project.classpath"
+			fork="true"
+			newenvironment="true"
+		>
+			<jvmarg value="-Xmx128m" />
+		</java>
+	</target>
+
+	<target name="upgrade-db">
+		<java
+			classname="com.liferay.portal.tools.DBUpgrader"
+			classpathref="project.classpath"
+			fork="true"
+			maxmemory="1024m"
+			newenvironment="true"
+		>
+			<jvmarg value="-Dfile.encoding=UTF-8" />
+			<jvmarg value="-Duser.country=US" />
+			<jvmarg value="-Duser.language=en" />
+			<jvmarg value="-Duser.timezone=GMT" />
+		</java>
+	</target>
+</project>

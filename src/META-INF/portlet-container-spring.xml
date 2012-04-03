@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+
+<beans
+	default-init-method="afterPropertiesSet"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
+>
+	<bean id="com.liferay.portlet.InvokerPortletImpl" class="com.liferay.portlet.InvokerPortletImpl" />
+	<bean id="com.liferay.portlet.PortletConfigFactoryUtil" class="com.liferay.portlet.PortletConfigFactoryUtil">
+		<property name="portletConfigFactory">
+			<bean class="com.liferay.portlet.PortletConfigFactoryImpl" />
+		</property>
+	</bean>
+	<bean id="com.liferay.portlet.PortletInstanceFactoryUtil" class="com.liferay.portlet.PortletInstanceFactoryUtil">
+		<property name="portletInstanceFactory">
+			<bean class="com.liferay.portlet.PortletInstanceFactoryImpl">
+				<property name="internalInvokerPortletPrototype" ref="com.liferay.portlet.InvokerPortletImpl" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="com.liferay.portlet.PortletPreferencesFactoryUtil" class="com.liferay.portlet.PortletPreferencesFactoryUtil">
+		<property name="portletPreferencesFactory">
+			<bean class="com.liferay.portlet.PortletPreferencesFactoryImpl" />
+		</property>
+	</bean>
+	<bean id="com.liferay.portlet.PortletQNameUtil" class="com.liferay.portlet.PortletQNameUtil">
+		<property name="portletQName">
+			<bean class="com.liferay.portlet.PortletQNameImpl" />
+		</property>
+	</bean>
+	<bean id="com.liferay.portlet.PortletURLFactoryUtil" class="com.liferay.portlet.PortletURLFactoryUtil">
+		<property name="portletURLFactory">
+			<bean class="com.liferay.portlet.PortletURLFactoryImpl" />
+		</property>
+	</bean>
+</beans>

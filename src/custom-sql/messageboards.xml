@@ -1,0 +1,319 @@
+<?xml version="1.0"?>
+
+<custom-sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBCategoryFinder.countByS_G_U_P">
+		<![CDATA[
+			SELECT
+				COUNT(DISTINCT MBCategory.categoryId) AS COUNT_VALUE
+			FROM
+				MBCategory
+			INNER JOIN
+				Subscription ON
+					(Subscription.companyId = MBCategory.companyId) AND
+					(Subscription.classNameId = ?) AND
+					(Subscription.classPK = MBCategory.categoryId)
+			WHERE
+				(MBCategory.groupId = ?) AND
+				(MBCategory.parentCategoryId = ?) AND
+				(Subscription.userId = ?)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBCategoryFinder.findByS_G_U_P">
+		<![CDATA[
+			SELECT
+				DISTINCT {MBCategory.*}
+			FROM
+				MBCategory
+			INNER JOIN
+				Subscription ON
+					(Subscription.companyId = MBCategory.companyId) AND
+					(Subscription.classNameId = ?) AND
+					(Subscription.classPK = MBCategory.categoryId)
+			WHERE
+				(MBCategory.groupId = ?) AND
+				(MBCategory.parentCategoryId = ?) AND
+				(Subscription.userId = ?)
+			ORDER BY
+				MBCategory.lastPostDate DESC
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBMessageFinder.countByC_T">
+		<![CDATA[
+			SELECT
+				COUNT(*) AS COUNT_VALUE
+			FROM
+				MBMessage
+			WHERE
+				(createDate <= ?) AND
+				(threadId = ?)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBMessageFinder.countByG_U_C_S">
+		<![CDATA[
+			SELECT
+				COUNT(DISTINCT currentMessage.threadId) AS COUNT_VALUE
+			FROM
+				MBMessage currentMessage
+			INNER JOIN
+				MBMessage rootMessage ON
+					(rootMessage.messageId = currentMessage.rootMessageId)
+			WHERE
+				(currentMessage.groupId = ?) AND
+				(currentMessage.categoryId = ?) AND
+				(currentMessage.userId = ?)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBMessageFinder.countByG_U_C_A_S">
+		<![CDATA[
+			SELECT
+				COUNT(DISTINCT currentMessage.threadId) AS COUNT_VALUE
+			FROM
+				MBMessage currentMessage
+			INNER JOIN
+				MBMessage rootMessage ON
+					(rootMessage.messageId = currentMessage.rootMessageId)
+			WHERE
+				(currentMessage.groupId = ?) AND
+				(currentMessage.categoryId = ?) AND
+				(currentMessage.userId = ?) AND
+				(currentMessage.anonymous = ?)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBMessageFinder.findByNoAssets">
+		<![CDATA[
+			SELECT
+				{MBMessage.*}
+			FROM
+				MBMessage
+			WHERE
+				(messageId NOT IN(
+					SELECT
+						classPK
+					FROM
+						AssetEntry
+					WHERE
+						classNameId = [$CLASS_NAME_ID_COM.LIFERAY.PORTLET.MESSAGEBOARDS.MODEL.MBMESSAGE$]
+				))
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBMessageFinder.findByG_U_C_S">
+		<![CDATA[
+			SELECT
+				currentMessage.threadId
+			FROM
+				MBMessage currentMessage
+			INNER JOIN
+				MBMessage rootMessage ON
+					(rootMessage.messageId = currentMessage.rootMessageId)
+			WHERE
+				(currentMessage.groupId = ?) AND
+				(currentMessage.categoryId = ?) AND
+				(currentMessage.userId = ?)
+			GROUP BY
+				currentMessage.threadId
+			ORDER BY
+				MAX(currentMessage.priority) DESC,
+				MAX(currentMessage.modifiedDate) DESC
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBMessageFinder.findByG_U_C_A_S">
+		<![CDATA[
+			SELECT
+				currentMessage.threadId
+			FROM
+				MBMessage currentMessage
+			INNER JOIN
+				MBMessage rootMessage ON
+					(rootMessage.messageId = currentMessage.rootMessageId)
+			WHERE
+				(currentMessage.groupId = ?) AND
+				(currentMessage.categoryId = ?) AND
+				(currentMessage.userId = ?) AND
+				(currentMessage.anonymous = ?)
+			GROUP BY
+				currentMessage.threadId
+			ORDER BY
+				MAX(currentMessage.priority) DESC,
+				MAX(currentMessage.modifiedDate) DESC
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBThreadFinder.countByG_C">
+		<![CDATA[
+			SELECT
+				COUNT(DISTINCT MBThread.threadId) AS COUNT_VALUE
+			FROM
+				MBThread
+			WHERE
+				(MBThread.groupId = ?) AND
+				(MBThread.categoryId = ?)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBThreadFinder.countByG_U_S">
+		<![CDATA[
+			SELECT
+				COUNT(DISTINCT MBThread.threadId) AS COUNT_VALUE
+			FROM
+				MBThread
+			INNER JOIN
+				MBMessage ON
+					(MBThread.threadId = MBMessage.threadId)
+			WHERE
+				(MBThread.groupId = ?) AND
+				(MBMessage.userId = ?)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBThreadFinder.countByG_U_A_S">
+		<![CDATA[
+			SELECT
+				COUNT(DISTINCT MBThread.threadId) AS COUNT_VALUE
+			FROM
+				MBThread
+			INNER JOIN
+				MBMessage ON
+					(MBThread.threadId = MBMessage.threadId)
+			WHERE
+				(MBThread.groupId = ?) AND
+				(MBMessage.userId = ?) AND
+				(MBMessage.anonymous = ?)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBThreadFinder.countByS_G_U_S">
+		<![CDATA[
+			SELECT
+				COUNT(DISTINCT MBThread.threadId) AS COUNT_VALUE
+			FROM
+				MBThread
+			INNER JOIN
+				Subscription ON
+					(Subscription.companyId = MBThread.companyId) AND
+					(Subscription.classNameId = ?) AND
+					(Subscription.classPK = MBThread.threadId)
+			WHERE
+				(MBThread.groupId = ?) AND
+				(Subscription.userId = ?)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBThreadFinder.countByS_G_U_C_S">
+		<![CDATA[
+			SELECT
+				COUNT(DISTINCT MBThread.threadId) AS COUNT_VALUE
+			FROM
+				MBThread
+			INNER JOIN
+				Subscription ON
+					(Subscription.companyId = MBThread.companyId) AND
+					(Subscription.classNameId = ?) AND
+					(Subscription.classPK = MBThread.threadId)
+			WHERE
+				(MBThread.groupId = ?) AND
+				(MBThread.categoryId = ?) AND
+				(Subscription.userId = ?)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBThreadFinder.findByNoAssets">
+		<![CDATA[
+			SELECT
+				{MBThread.*}
+			FROM
+				MBThread
+			WHERE
+				(threadId NOT IN(
+					SELECT
+						classPK
+					FROM
+						AssetEntry
+					WHERE
+						classNameId = [$CLASS_NAME_ID_COM.LIFERAY.PORTLET.MESSAGEBOARDS.MODEL.MBTHREAD$]
+				)) AND
+				(categoryId >= 0)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBThreadFinder.findByG_C">
+		<![CDATA[
+			SELECT
+				DISTINCT {MBThread.*}
+			FROM
+				MBThread
+			WHERE
+				(MBThread.groupId = ?) AND
+				(MBThread.categoryId = ?)
+			ORDER BY
+				MBThread.priority DESC,
+				MBThread.lastPostDate DESC
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBThreadFinder.findByG_U_S">
+		<![CDATA[
+			SELECT
+				DISTINCT {MBThread.*}
+			FROM
+				MBThread
+			INNER JOIN
+				MBMessage ON
+					(MBThread.threadId = MBMessage.threadId)
+			WHERE
+				(MBThread.groupId = ?) AND
+				(MBMessage.userId = ?)
+			ORDER BY
+				MBThread.priority DESC,
+				MBThread.lastPostDate DESC
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBThreadFinder.findByG_U_A_S">
+		<![CDATA[
+			SELECT
+				DISTINCT {MBThread.*}
+			FROM
+				MBThread
+			INNER JOIN
+				MBMessage ON
+					(MBThread.threadId = MBMessage.threadId)
+			WHERE
+				(MBThread.groupId = ?) AND
+				(MBMessage.userId = ?) AND
+				(MBMessage.anonymous = ?)
+			ORDER BY
+				MBThread.priority DESC,
+				MBThread.lastPostDate DESC
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBThreadFinder.findByS_G_U_S">
+		<![CDATA[
+			SELECT
+				DISTINCT {MBThread.*}
+			FROM
+				MBThread
+			INNER JOIN
+				Subscription ON
+					(Subscription.companyId = MBThread.companyId) AND
+					(Subscription.classNameId = ?) AND
+					(Subscription.classPK = MBThread.threadId)
+			WHERE
+				(MBThread.groupId = ?) AND
+				(Subscription.userId = ?)
+			ORDER BY
+				MBThread.priority DESC,
+				MBThread.lastPostDate DESC
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.messageboards.service.persistence.MBThreadFinder.findByS_G_U_C_S">
+		<![CDATA[
+			SELECT
+				DISTINCT {MBThread.*}
+			FROM
+				MBThread
+			INNER JOIN
+				Subscription ON
+					(Subscription.companyId = MBThread.companyId) AND
+					(Subscription.classNameId = ?) AND
+					(Subscription.classPK = MBThread.threadId)
+			WHERE
+				(MBThread.groupId = ?) AND
+				(MBThread.categoryId = ?) AND
+				(Subscription.userId = ?)
+			ORDER BY
+				MBThread.priority DESC,
+				MBThread.lastPostDate DESC
+		]]>
+	</sql>
+</custom-sql>

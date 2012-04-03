@@ -1,0 +1,523 @@
+<?xml version="1.0"?>
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 6.1.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_6_1_0.dtd">
+
+<service-builder package-path="com.liferay.portlet.messageboards">
+	<namespace>MB</namespace>
+	<entity name="MBBan" human-name="message boards ban" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="banId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="banUserId" type="long" />
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
+		</finder>
+		<finder name="UserId" return-type="Collection">
+			<finder-column name="userId" />
+		</finder>
+		<finder name="BanUserId" return-type="Collection">
+			<finder-column name="banUserId" />
+		</finder>
+		<finder name="G_B" return-type="MBBan" unique="true">
+			<finder-column name="groupId" />
+			<finder-column name="banUserId" />
+		</finder>
+	</entity>
+	<entity name="MBCategory" human-name="message boards category" uuid="true" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="categoryId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="parentCategoryId" type="long" />
+		<column name="name" type="String" />
+		<column name="description" type="String" />
+		<column name="displayStyle" type="String" />
+		<column name="threadCount" type="int" />
+		<column name="messageCount" type="int" />
+		<column name="lastPostDate" type="Date" />
+
+		<!-- Order -->
+
+		<order by="asc">
+			<order-column name="parentCategoryId" />
+			<order-column name="name" case-sensitive="false" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
+		</finder>
+		<finder name="CompanyId" return-type="Collection">
+			<finder-column name="companyId" />
+		</finder>
+		<finder name="G_P" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="parentCategoryId" arrayable-operator="OR" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portal" entity="Group" />
+		<reference package-path="com.liferay.portal" entity="Subscription" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetTag" />
+		<reference package-path="com.liferay.portlet.expando" entity="ExpandoValue" />
+	</entity>
+	<entity name="MBDiscussion" human-name="message boards discussion" local-service="true" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="discussionId" type="long" primary="true" />
+
+		<!-- Other fields -->
+
+		<column name="classNameId" type="long" />
+		<column name="classPK" type="long" />
+		<column name="threadId" type="long" />
+
+		<!-- Finder methods -->
+
+		<finder name="ClassNameId" return-type="Collection">
+			<finder-column name="classNameId" />
+		</finder>
+		<finder name="ThreadId" return-type="MBDiscussion" unique="true">
+			<finder-column name="threadId" />
+		</finder>
+		<finder name="C_C" return-type="MBDiscussion" unique="true">
+			<finder-column name="classNameId" />
+			<finder-column name="classPK" />
+		</finder>
+	</entity>
+	<entity name="MBMailingList" human-name="message boards mailing list" uuid="true" local-service="true" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="mailingListId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="categoryId" type="long" />
+		<column name="emailAddress" type="String" />
+		<column name="inProtocol" type="String" />
+		<column name="inServerName" type="String" />
+		<column name="inServerPort" type="int" />
+		<column name="inUseSSL" type="boolean" />
+		<column name="inUserName" type="String" />
+		<column name="inPassword" type="String" />
+		<column name="inReadInterval" type="int" />
+		<column name="outEmailAddress" type="String" />
+		<column name="outCustom" type="boolean" />
+		<column name="outServerName" type="String" />
+		<column name="outServerPort" type="int" />
+		<column name="outUseSSL" type="boolean" />
+		<column name="outUserName" type="String" />
+		<column name="outPassword" type="String" />
+		<column name="allowAnonymous" type="boolean" />
+		<column name="active" type="boolean" />
+
+		<!-- Finder methods -->
+
+		<finder name="Active" return-type="Collection">
+			<finder-column name="active" />
+		</finder>
+		<finder name="G_C" return-type="MBMailingList" unique="true">
+			<finder-column name="groupId" />
+			<finder-column name="categoryId" />
+		</finder>
+	</entity>
+	<entity name="MBMessage" human-name="message-boards message" uuid="true" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="messageId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="classNameId" type="long" />
+		<column name="classPK" type="long" />
+		<column name="categoryId" type="long" />
+		<column name="threadId" type="long" />
+		<column name="rootMessageId" type="long" filter-primary="true" />
+		<column name="parentMessageId" type="long" />
+		<column name="subject" type="String" />
+		<column name="body" type="String" />
+		<column name="format" type="String" />
+		<column name="attachments" type="boolean" />
+		<column name="anonymous" type="boolean" />
+		<column name="priority" type="double" />
+		<column name="allowPingbacks" type="boolean" />
+		<column name="answer" type="boolean" />
+		<column name="status" type="int" />
+		<column name="statusByUserId" type="long" />
+		<column name="statusByUserName" type="String" />
+		<column name="statusDate" type="Date" />
+
+		<!-- Order -->
+
+		<order by="asc">
+			<order-column name="createDate" />
+			<order-column name="messageId" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
+		</finder>
+		<finder name="CompanyId" return-type="Collection">
+			<finder-column name="companyId" />
+		</finder>
+		<finder name="ThreadId" return-type="Collection">
+			<finder-column name="threadId" />
+		</finder>
+		<finder name="ThreadReplies" return-type="Collection" where="parentMessageId != 0" db-index="false">
+			<finder-column name="threadId" />
+		</finder>
+		<finder name="UserId" return-type="Collection">
+			<finder-column name="userId" />
+		</finder>
+		<finder name="G_U" return-type="Collection" where="(categoryId != -1) AND (anonymous = [$FALSE$])">
+			<finder-column name="groupId" />
+			<finder-column name="userId" />
+		</finder>
+		<finder name="G_C" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="categoryId" />
+		</finder>
+		<finder name="G_S" return-type="Collection" where="categoryId != -1">
+			<finder-column name="groupId" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="C_S" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="U_C" return-type="Collection">
+			<finder-column name="userId" />
+			<finder-column name="classNameId" arrayable-operator="OR" />
+		</finder>
+		<finder name="C_C" return-type="Collection">
+			<finder-column name="classNameId" />
+			<finder-column name="classPK" />
+		</finder>
+		<finder name="T_P" return-type="Collection">
+			<finder-column name="threadId" />
+			<finder-column name="parentMessageId" />
+		</finder>
+		<finder name="T_A" return-type="Collection">
+			<finder-column name="threadId" />
+			<finder-column name="answer" />
+		</finder>
+		<finder name="T_S" return-type="Collection">
+			<finder-column name="threadId" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="TR_S" return-type="Collection" where="parentMessageId != 0" db-index="false">
+			<finder-column name="threadId" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="G_U_S" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="userId" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="G_C_T" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="categoryId" />
+			<finder-column name="threadId" />
+		</finder>
+		<finder name="G_C_S" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="categoryId" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="U_C_C" return-type="Collection">
+			<finder-column name="userId" />
+			<finder-column name="classNameId" />
+			<finder-column name="classPK" />
+		</finder>
+		<finder name="U_C_S" return-type="Collection">
+			<finder-column name="userId" />
+			<finder-column name="classNameId" arrayable-operator="OR" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="C_C_S" return-type="Collection">
+			<finder-column name="classNameId" />
+			<finder-column name="classPK" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="G_C_T_A" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="categoryId" />
+			<finder-column name="threadId" />
+			<finder-column name="answer" />
+		</finder>
+		<finder name="G_C_T_S" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="categoryId" />
+			<finder-column name="threadId" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="U_C_C_S" return-type="Collection">
+			<finder-column name="userId" />
+			<finder-column name="classNameId" />
+			<finder-column name="classPK" />
+			<finder-column name="status" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.mail" entity="Mail" />
+		<reference package-path="com.liferay.portal" entity="Company" />
+		<reference package-path="com.liferay.portal" entity="Group" />
+		<reference package-path="com.liferay.portal" entity="Lock" />
+		<reference package-path="com.liferay.portal" entity="PortletPreferences" />
+		<reference package-path="com.liferay.portal" entity="Subscription" />
+		<reference package-path="com.liferay.portal" entity="WorkflowInstanceLink" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetEntry" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetLink" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetTag" />
+		<reference package-path="com.liferay.portlet.blogs" entity="BlogsEntry" />
+		<reference package-path="com.liferay.portlet.ratings" entity="RatingsStats" />
+		<reference package-path="com.liferay.portlet.social" entity="SocialActivity" />
+		<reference package-path="com.liferay.portlet.expando" entity="ExpandoValue" />
+		<reference package-path="com.liferay.portlet.wiki" entity="WikiPage" />
+	</entity>
+	<entity name="MBStatsUser" human-name="message boards stats user" local-service="true" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="statsUserId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="userId" type="long" />
+
+		<!-- Other fields -->
+
+		<column name="messageCount" type="int" />
+		<column name="lastPostDate" type="Date" />
+
+		<!-- Order -->
+
+		<order by="desc">
+			<order-column name="messageCount" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
+		</finder>
+		<finder name="UserId" return-type="Collection">
+			<finder-column name="userId" />
+		</finder>
+		<finder name="G_U" return-type="MBStatsUser" unique="true">
+			<finder-column name="groupId" />
+			<finder-column name="userId" />
+		</finder>
+		<finder name="G_NotU_NotM" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="userId" comparator="!=" />
+			<finder-column name="messageCount" comparator="!=" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portal" entity="Group" />
+	</entity>
+	<entity name="MBThread" human-name="message boards thread" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="threadId" type="long" primary="true" />
+
+		<!-- Group instance -->
+
+		<column name="groupId" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+
+		<!-- Other fields -->
+
+		<column name="categoryId" type="long" />
+		<column name="rootMessageId" type="long" />
+		<column name="rootMessageUserId" type="long" />
+		<column name="messageCount" type="int" />
+		<column name="viewCount" type="int" />
+		<column name="lastPostByUserId" type="long" />
+		<column name="lastPostDate" type="Date" />
+		<column name="priority" type="double" />
+		<column name="question" type="boolean" />
+		<column name="status" type="int" />
+		<column name="statusByUserId" type="long" />
+		<column name="statusByUserName" type="String" />
+		<column name="statusDate" type="Date" />
+
+		<!-- Order -->
+
+		<order by="desc">
+			<order-column name="priority" />
+			<order-column name="lastPostDate" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="GroupId" return-type="Collection">
+			<finder-column name="groupId" />
+		</finder>
+		<finder name="RootMessageId" return-type="MBMessage">
+			<finder-column name="rootMessageId" />
+		</finder>
+		<finder name="G_C" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="categoryId" arrayable-operator="OR" />
+		</finder>
+		<finder name="G_NotC" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="categoryId" comparator="!=" />
+		</finder>
+		<finder name="G_S" return-type="Collection" where="categoryId != -1">
+			<finder-column name="groupId" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="C_P" return-type="Collection">
+			<finder-column name="categoryId" />
+			<finder-column name="priority" />
+		</finder>
+		<finder name="L_P" return-type="Collection">
+			<finder-column name="lastPostDate" />
+			<finder-column name="priority" />
+		</finder>
+		<finder name="G_C_L" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="categoryId" />
+			<finder-column name="lastPostDate" />
+		</finder>
+		<finder name="G_C_S" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="categoryId" arrayable-operator="OR" />
+			<finder-column name="status" />
+		</finder>
+		<finder name="G_NotC_S" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="categoryId" comparator="!=" />
+			<finder-column name="status" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.portal" entity="Lock" />
+		<reference package-path="com.liferay.portal" entity="WorkflowInstanceLink" />
+		<reference package-path="com.liferay.portlet.asset" entity="AssetEntry" />
+		<reference package-path="com.liferay.portlet.ratings" entity="RatingsStats" />
+		<reference package-path="com.liferay.portlet.social" entity="SocialActivity" />
+	</entity>
+	<entity name="MBThreadFlag" human-name="message boards thread flag" local-service="true" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="threadFlagId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="userId" type="long" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="threadId" type="long" />
+
+		<!-- Finder methods -->
+
+		<finder name="UserId" return-type="Collection">
+			<finder-column name="userId" />
+		</finder>
+		<finder name="ThreadId" return-type="Collection">
+			<finder-column name="threadId" />
+		</finder>
+		<finder name="U_T" return-type="MBThreadFlag">
+			<finder-column name="userId" />
+			<finder-column name="threadId" />
+		</finder>
+	</entity>
+	<exceptions>
+		<exception>BannedUser</exception>
+		<exception>CategoryName</exception>
+		<exception>LockedThread</exception>
+		<exception>MessageBody</exception>
+		<exception>MessageSubject</exception>
+		<exception>MailingListEmailAddress</exception>
+		<exception>MailingListInServerName</exception>
+		<exception>MailingListInUserName</exception>
+		<exception>MailingListOutEmailAddress</exception>
+		<exception>MailingListOutServerName</exception>
+		<exception>MailingListOutUserName</exception>
+		<exception>MessageSubject</exception>
+		<exception>RequiredMessage</exception>
+		<exception>SplitThread</exception>
+	</exceptions>
+</service-builder>

@@ -1,0 +1,231 @@
+<?xml version="1.0"?>
+
+<beans
+	default-destroy-method="destroy"
+	default-init-method="afterPropertiesSet"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
+>
+
+	<!-- Destinations -->
+
+	<bean id="destination.async_service" class="com.liferay.portal.kernel.messaging.ParallelDestination">
+		<property name="name" value="liferay/async_service" />
+	</bean>
+	<bean id="destination.buffered_increment_parallel" class="com.liferay.portal.kernel.messaging.ParallelDestination">
+		<property name="maximumQueueSize">
+			<util:constant static-field="com.liferay.portal.util.PropsValues.BUFFERED_INCREMENT_PARALLEL_QUEUE_SIZE" />
+		</property>
+		<property name="name" value="liferay/buffered_increment_parallel" />
+		<property name="rejectedExecutionHandler">
+			<bean class="com.liferay.portal.increment.BufferedIncrementDiscardPolicy" />
+		</property>
+	</bean>
+	<bean id="destination.buffered_increment_serial" class="com.liferay.portal.kernel.messaging.SerialDestination">
+		<property name="maximumQueueSize">
+			<util:constant static-field="com.liferay.portal.util.PropsValues.BUFFERED_INCREMENT_SERIAL_QUEUE_SIZE" />
+		</property>
+		<property name="name" value="liferay/buffered_increment_serial" />
+		<property name="rejectedExecutionHandler">
+			<bean class="com.liferay.portal.increment.BufferedIncrementDiscardPolicy" />
+		</property>
+	</bean>
+	<bean id="destination.convert_process" class="com.liferay.portal.kernel.messaging.SerialDestination">
+		<property name="name" value="liferay/convert_process" />
+	</bean>
+	<bean id="destination.document_library_audio_processor" class="com.liferay.portal.kernel.messaging.SerialDestination">
+		<property name="name" value="liferay/document_library_audio_processor" />
+	</bean>
+	<bean id="destination.document_library_image_processor" class="com.liferay.portal.kernel.messaging.SerialDestination">
+		<property name="name" value="liferay/document_library_image_processor" />
+	</bean>
+	<bean id="destination.document_library_pdf_processor" class="com.liferay.portal.kernel.messaging.SerialDestination">
+		<property name="name" value="liferay/document_library_pdf_processor" />
+	</bean>
+	<bean id="destination.document_library_raw_metadata_processor" class="com.liferay.portal.kernel.messaging.SerialDestination">
+		<property name="name" value="liferay/document_library_raw_metadata_processor" />
+	</bean>
+	<bean id="destination.document_library_video_processor" class="com.liferay.portal.kernel.messaging.SerialDestination">
+		<property name="name" value="liferay/document_library_video_processor" />
+	</bean>
+	<bean id="destination.flags" class="com.liferay.portal.kernel.messaging.ParallelDestination">
+		<property name="name" value="liferay/flags" />
+	</bean>
+	<bean id="destination.hot_deploy" class="com.liferay.portal.kernel.messaging.SerialDestination">
+		<property name="name" value="liferay/hot_deploy" />
+	</bean>
+	<bean id="destination.layouts_local_publisher" class="com.liferay.portal.kernel.messaging.ParallelDestination">
+		<property name="name" value="liferay/layouts_local_publisher" />
+	</bean>
+	<bean id="destination.layouts_remote_publisher" class="com.liferay.portal.kernel.messaging.ParallelDestination">
+		<property name="name" value="liferay/layouts_remote_publisher" />
+	</bean>
+	<bean id="destination.live_users" class="com.liferay.portal.kernel.messaging.SerialDestination">
+		<property name="name" value="liferay/live_users" />
+	</bean>
+	<bean id="destination.message_boards_mailing_list" class="com.liferay.portal.kernel.messaging.ParallelDestination">
+		<property name="name" value="liferay/message_boards_mailing_list" />
+	</bean>
+	<bean id="destination.subscription_sender" class="com.liferay.portal.kernel.messaging.ParallelDestination">
+		<property name="name" value="liferay/subscription_sender" />
+	</bean>
+
+	<!-- Listeners -->
+
+	<bean id="messageListener.async_service" class="com.liferay.portal.messaging.async.AsyncMessageListener" />
+	<bean id="messageListener.buffered_increment" class="com.liferay.portal.increment.BufferedIncrementMessageListener" />
+	<bean id="messageListener.convert_process" class="com.liferay.portal.convert.messaging.ConvertProcessMessageListener" />
+	<bean id="messageListener.document_library_audio_processor" class="com.liferay.portlet.documentlibrary.messaging.AudioProcessorMessageListener" />
+	<bean id="messageListener.document_library_image_processor" class="com.liferay.portlet.documentlibrary.messaging.ImageProcessorMessageListener" />
+	<bean id="messageListener.document_library_pdf_processor" class="com.liferay.portlet.documentlibrary.messaging.PDFProcessorMessageListener" />
+	<bean id="messageListener.document_library_raw_metadata_processor" class="com.liferay.portlet.documentlibrary.messaging.RawMetadataProcessorMessageListener" />
+	<bean id="messageListener.document_library_video_processor" class="com.liferay.portlet.documentlibrary.messaging.VideoProcessorMessageListener" />
+	<bean id="messageListener.flags" class="com.liferay.portlet.flags.messaging.FlagsRequestMessageListener" />
+	<bean id="messageListener.hot_deploy" class="com.liferay.portal.deploy.hot.messaging.HotDeployMessageListener" />
+	<bean id="messageListener.layouts_local_publisher" class="com.liferay.portal.kernel.scheduler.messaging.SchedulerEventMessageListenerWrapper">
+		<property name="className" value="com.liferay.portal.messaging.LayoutsLocalPublisherMessageListener" />
+		<property name="messageListener">
+			<bean class="com.liferay.portal.messaging.LayoutsLocalPublisherMessageListener">
+				<property name="responseSender" ref="com.liferay.portal.kernel.messaging.sender.MessageSender" />
+				<property name="statusSender" ref="messageSender.service_request_status" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="messageListener.layouts_remote_publisher" class="com.liferay.portal.kernel.scheduler.messaging.SchedulerEventMessageListenerWrapper">
+		<property name="className" value="com.liferay.portal.messaging.LayoutsRemotePublisherMessageListener" />
+		<property name="messageListener">
+			<bean class="com.liferay.portal.messaging.LayoutsRemotePublisherMessageListener">
+				<property name="responseSender" ref="com.liferay.portal.kernel.messaging.sender.MessageSender" />
+				<property name="statusSender" ref="messageSender.service_request_status" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="messageListener.live_users" class="com.liferay.portal.liveusers.messaging.LiveUsersMessageListener" />
+	<bean id="messageListener.live_users_cluster" class="com.liferay.portal.kernel.cluster.messaging.ClusterBridgeMessageListener">
+		<property name="priority">
+			<util:constant static-field="com.liferay.portal.kernel.cluster.Priority.LEVEL5" />
+		</property>
+	</bean>
+	<bean id="messageListener.message_boards_mailing_list" class="com.liferay.portal.kernel.scheduler.messaging.SchedulerEventMessageListenerWrapper">
+		<property name="className" value="com.liferay.portlet.messageboards.messaging.MailingListMessageListener" />
+		<property name="messageListener">
+			<bean class="com.liferay.portlet.messageboards.messaging.MailingListMessageListener" />
+		</property>
+	</bean>
+	<bean id="messageListener.subscription_sender" class="com.liferay.portal.messaging.SubscriptionSenderMessageListener" />
+
+	<!-- Configurator -->
+
+	<bean id="messagingConfigurator.misc" class="com.liferay.portal.kernel.messaging.config.DefaultMessagingConfigurator">
+		<property name="destinations">
+			<list>
+				<ref bean="destination.async_service" />
+				<ref bean="destination.buffered_increment_parallel" />
+				<ref bean="destination.buffered_increment_serial" />
+				<ref bean="destination.convert_process" />
+				<ref bean="destination.document_library_audio_processor" />
+				<ref bean="destination.document_library_image_processor" />
+				<ref bean="destination.document_library_pdf_processor" />
+				<ref bean="destination.document_library_raw_metadata_processor" />
+				<ref bean="destination.document_library_video_processor" />
+				<ref bean="destination.flags" />
+				<ref bean="destination.hot_deploy" />
+				<ref bean="destination.layouts_local_publisher" />
+				<ref bean="destination.layouts_remote_publisher" />
+				<ref bean="destination.live_users" />
+				<ref bean="destination.message_boards_mailing_list" />
+				<ref bean="destination.subscription_sender" />
+			</list>
+		</property>
+		<property name="messageBus">
+			<ref bean="com.liferay.portal.kernel.messaging.MessageBus" />
+		</property>
+		<property name="messageListeners">
+			<map key-type="java.lang.String" value-type="java.util.List">
+				<entry key="liferay/async_service">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.async_service" />
+					</list>
+				</entry>
+				<entry key="liferay/buffered_increment_parallel">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.buffered_increment" />
+					</list>
+				</entry>
+				<entry key="liferay/buffered_increment_serial">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.buffered_increment" />
+					</list>
+				</entry>
+				<entry key="liferay/convert_process">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.convert_process" />
+					</list>
+				</entry>
+				<entry key="liferay/document_library_audio_processor">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.document_library_audio_processor" />
+					</list>
+				</entry>
+				<entry key="liferay/document_library_image_processor">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.document_library_image_processor" />
+					</list>
+				</entry>
+				<entry key="liferay/document_library_pdf_processor">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.document_library_pdf_processor" />
+					</list>
+				</entry>
+				 <entry key="liferay/document_library_raw_metadata_processor">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.document_library_raw_metadata_processor" />
+					</list>
+				</entry>
+				<entry key="liferay/document_library_video_processor">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.document_library_video_processor" />
+					</list>
+				</entry>
+				<entry key="liferay/flags">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.flags" />
+					</list>
+				</entry>
+				<entry key="liferay/hot_deploy">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.hot_deploy" />
+					</list>
+				</entry>
+				<entry key="liferay/layouts_local_publisher">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.layouts_local_publisher" />
+					</list>
+				</entry>
+				<entry key="liferay/layouts_remote_publisher">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.layouts_remote_publisher" />
+					</list>
+				</entry>
+				<entry key="liferay/live_users">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.live_users" />
+						<ref bean="messageListener.live_users_cluster" />
+					</list>
+				</entry>
+				<entry key="liferay/message_boards_mailing_list">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.message_boards_mailing_list" />
+					</list>
+				</entry>
+				<entry key="liferay/subscription_sender">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.subscription_sender" />
+					</list>
+				</entry>
+			</map>
+		</property>
+	</bean>
+</beans>

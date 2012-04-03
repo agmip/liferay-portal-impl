@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+
+<custom-sql>
+	<sql id="com.liferay.portlet.journal.service.persistence.JournalArticleFinder.countByC_G_C_A_V_T_D_C_T_S_T_D_S_R">
+		<![CDATA[
+			SELECT
+				COUNT(*) AS COUNT_VALUE
+			FROM
+				(
+					SELECT
+						groupId AS tempGroupId, articleId AS tempArticleId, MAX(version) AS tempVersion
+					FROM
+						JournalArticle
+					WHERE
+						(companyId = ?) AND
+						(groupId = ?) AND
+						(classNameId = ?) AND
+						(
+							(articleId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(version = ?) [$AND_OR_CONNECTOR$]
+							(lower(title) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(description LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(content LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(type_ = ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(structureId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(templateId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(displayDate >= ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(displayDate <= ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(
+								(status = ?) AND
+								(reviewDate <= ? [$AND_OR_NULL_CHECK$])
+							)
+						)
+					[$GROUP_BY_CLAUSE$]
+				) TEMP_TABLE
+				INNER JOIN
+					JournalArticle ON
+						(TEMP_TABLE.tempGroupId = JournalArticle.groupId) AND
+						(TEMP_TABLE.tempArticleId = JournalArticle.articleId) AND
+						(TEMP_TABLE.tempVersion = JournalArticle.version)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.journal.service.persistence.JournalArticleFinder.findByExpirationDate">
+		<![CDATA[
+			SELECT
+				{JournalArticle.*}
+			FROM
+				JournalArticle
+			WHERE
+				(classNameId = ?) AND
+				(status = ?) AND
+				(expirationDate <= ?)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.journal.service.persistence.JournalArticleFinder.findByReviewDate">
+		<![CDATA[
+			SELECT
+				{JournalArticle.*}
+			FROM
+				JournalArticle
+			WHERE
+				(classNameId = ?) AND
+				(reviewDate >= ?) AND
+				(reviewDate <= ?)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.journal.service.persistence.JournalArticleFinder.findByR_D">
+		<![CDATA[
+			SELECT
+				{JournalArticle.*}
+			FROM
+				JournalArticle
+			WHERE
+				(resourcePrimKey = ?) AND
+				(displayDate <= ?) AND
+				(status = 0) AND
+				(indexable = [$TRUE$])
+			ORDER BY
+				version DESC
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.journal.service.persistence.JournalArticleFinder.findByC_G_C_A_V_T_D_C_T_S_T_D_S_R">
+		<![CDATA[
+			SELECT
+				JournalArticle.*
+			FROM
+				(
+					SELECT
+						groupId AS tempGroupId, articleId AS tempArticleId, MAX(version) AS tempVersion
+					FROM
+						JournalArticle
+					WHERE
+						(companyId = ?) AND
+						(groupId = ?) AND
+						(classNameId = ?) AND
+						(
+							(articleId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(version = ?) [$AND_OR_CONNECTOR$]
+							(lower(title) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(description LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(content LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(type_ = ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(structureId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(templateId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(displayDate >= ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(displayDate <= ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+							(
+								(status = ?) AND
+								(reviewDate <= ? [$AND_OR_NULL_CHECK$])
+							)
+						)
+					[$GROUP_BY_CLAUSE$]
+				) TEMP_TABLE
+				INNER JOIN
+					JournalArticle ON
+						(TEMP_TABLE.tempGroupId = JournalArticle.groupId) AND
+						(TEMP_TABLE.tempArticleId = JournalArticle.articleId) AND
+						(TEMP_TABLE.tempVersion = JournalArticle.version)
+			ORDER BY
+				id_ ASC
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.journal.service.persistence.JournalFeedFinder.countByC_G_F_N_D">
+		<![CDATA[
+			SELECT
+				COUNT(*) AS COUNT_VALUE
+			FROM
+				JournalFeed
+			WHERE
+				(companyId = ?) AND
+				(groupId = ?) AND
+				(
+					(feedId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(lower(name) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(lower(description) LIKE ? [$AND_OR_NULL_CHECK$])
+				)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.journal.service.persistence.JournalFeedFinder.findByC_G_F_N_D">
+		<![CDATA[
+			SELECT
+				{JournalFeed.*}
+			FROM
+				JournalFeed
+			WHERE
+				(companyId = ?) AND
+				(groupId = ?) AND
+				(
+					(feedId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(lower(name) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(lower(description) LIKE ? [$AND_OR_NULL_CHECK$])
+				)
+			ORDER BY
+				feedId ASC
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.journal.service.persistence.JournalStructureFinder.countByC_G_S_N_D">
+		<![CDATA[
+			SELECT
+				COUNT(*) AS COUNT_VALUE
+			FROM
+				JournalStructure
+			WHERE
+				(companyId = ?) AND
+				[$GROUP_ID$]
+				(
+					(structureId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(lower(name) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(lower(description) LIKE ? [$AND_OR_NULL_CHECK$])
+				)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.journal.service.persistence.JournalStructureFinder.findByC_G_S_N_D">
+		<![CDATA[
+			SELECT
+				{JournalStructure.*}
+			FROM
+				JournalStructure
+			WHERE
+				(companyId = ?) AND
+				[$GROUP_ID$]
+				(
+					(structureId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(lower(name) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(lower(description) LIKE ? [$AND_OR_NULL_CHECK$])
+				)
+			ORDER BY
+				structureId ASC
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.journal.service.persistence.JournalTemplateFinder.countByC_G_T_S_N_D">
+		<![CDATA[
+			SELECT
+				COUNT(*) AS COUNT_VALUE
+			FROM
+				JournalTemplate
+			WHERE
+				(companyId = ?) AND
+				[$GROUP_ID$]
+				(
+					(templateId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(structureId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(lower(name) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(lower(description) LIKE ? [$AND_OR_NULL_CHECK$])
+				)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.journal.service.persistence.JournalTemplateFinder.findByC_G_T_S_N_D">
+		<![CDATA[
+			SELECT
+				{JournalTemplate.*}
+			FROM
+				JournalTemplate
+			WHERE
+				(companyId = ?) AND
+				[$GROUP_ID$]
+				(
+					(templateId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(structureId LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(lower(name) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(lower(description) LIKE ? [$AND_OR_NULL_CHECK$])
+				)
+			ORDER BY
+				templateId ASC
+		]]>
+	</sql>
+</custom-sql>

@@ -1,0 +1,103 @@
+/**
+ * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+
+package com.liferay.portal.cache;
+
+import com.liferay.portal.kernel.cache.CacheRegistry;
+import com.liferay.portal.kernel.cache.CacheRegistryItem;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * @author Brian Wing Shun Chan
+ */
+public class CacheRegistryImpl implements CacheRegistry {
+
+	public void clear() {
+		for (Map.Entry<String, CacheRegistryItem> entry :
+				_cacheRegistryItems.entrySet()) {
+
+			CacheRegistryItem cacheRegistryItem = entry.getValue();
+
+			if (_log.isDebugEnabled()) {
+				_log.debug(
+					"Invalidating " + cacheRegistryItem.getRegistryName());
+			}
+
+			cacheRegistryItem.invalidate();
+		}
+	}
+
+	public void clear(String name) {
+		CacheRegistryItem cacheRegistryItem = _cacheRegistryItems.get(name);
+
+		if (cacheRegistryItem != null) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Invalidating " + name);
+			}
+
+			cacheRegistryItem.invalidate();
+		}
+		else {
+			_log.error("No cache registry found with name " + name);
+		}
+	}
+
+	public boolean isActive() {
+		return _active;
+	}
+
+	public void register(CacheRegistryItem cacheRegistryItem) {
+		String name = cacheRegistryItem.getRegistryName();
+
+		if (_log.isDebugEnabled()) {
+			_log.debug("Registering " + name);
+		}
+
+		if (_cacheRegistryItems.containsKey(name)) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Not registering duplicate " + name);
+			}
+		}
+		else {
+			_cacheRegistryItems.put(name, cacheRegistryItem);
+		}
+	}
+
+	public void setActive(boolean active) {
+		_active = active;
+
+		if (!active) {
+			clear();
+		}
+	}
+
+	public void unregister(String name) {
+		if (_log.isDebugEnabled()) {
+			_log.debug("Unregistering " + name);
+		}
+
+		_cacheRegistryItems.remove(name);
+	}
+
+	private static Log _log = LogFactoryUtil.getLog(CacheRegistryImpl.class);
+
+	private boolean _active = true;
+	private Map<String, CacheRegistryItem> _cacheRegistryItems =
+		new ConcurrentHashMap<String, CacheRegistryItem>();
+
+}

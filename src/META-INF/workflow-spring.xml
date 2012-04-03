@@ -1,0 +1,153 @@
+<?xml version="1.0"?>
+
+<beans
+	default-destroy-method="destroy"
+	default-init-method="afterPropertiesSet"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
+>
+
+	<!-- Advice -->
+
+	<bean id="com.liferay.portal.workflow.WorkflowLinkAdvice" class="com.liferay.portal.workflow.WorkflowLinkAdvice" />
+	<bean id="com.liferay.portal.workflow.WorkflowLockingAdvice" class="com.liferay.portal.workflow.WorkflowLockingAdvice" />
+	<bean id="com.liferay.portal.workflow.WorkflowPermissionAdvice" class="com.liferay.portal.workflow.WorkflowPermissionAdvice" />
+	<aop:config>
+		<aop:aspect ref="com.liferay.portal.workflow.WorkflowLockingAdvice" order="1">
+			<aop:around pointcut="execution (public void com.liferay.portal.workflow.WorkflowDefinitionManagerProxyBean.undeployWorkflowDefinition(..)) || execution (public com.liferay.portal.kernel.workflow.WorkflowInstance com.liferay.portal.workflow.WorkflowInstanceManagerProxyBean.startWorkflowInstance(..))" method="invoke" />
+		</aop:aspect>
+		<aop:aspect ref="com.liferay.portal.workflow.WorkflowPermissionAdvice" order="2">
+			<aop:around pointcut="bean(com.liferay.portal.workflow.WorkflowTaskManagerProxyBean)" method="invoke" />
+		</aop:aspect>
+		<aop:aspect ref="com.liferay.portal.workflow.WorkflowLinkAdvice" order="3">
+			<aop:around pointcut="execution (public * com.liferay.portal.workflow.WorkflowDefinitionManagerProxyBean.updateActive(..))" method="invoke" />
+		</aop:aspect>
+		<aop:aspect ref="messagingProxyAdvice" order="4">
+			<aop:around pointcut="bean(com.liferay.portal.workflow.*ProxyBean)" method="invoke" />
+		</aop:aspect>
+	</aop:config>
+
+	<!-- Proxy -->
+
+	<bean id="com.liferay.portal.workflow.WorkflowDefinitionManagerProxyBean" class="com.liferay.portal.workflow.WorkflowDefinitionManagerProxyBean">
+		<property name="singleDestinationSynchronousMessageSender">
+			<bean class="com.liferay.portal.kernel.messaging.sender.DefaultSingleDestinationSynchronousMessageSender">
+				<property name="destinationName" value="liferay/workflow_definition" />
+				<property name="synchronousMessageSender" ref="com.liferay.portal.kernel.messaging.sender.DirectSynchronousMessageSender" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="com.liferay.portal.workflow.WorkflowEngineManagerProxyBean" class="com.liferay.portal.workflow.WorkflowEngineManagerProxyBean">
+		<property name="singleDestinationSynchronousMessageSender">
+			<bean class="com.liferay.portal.kernel.messaging.sender.DefaultSingleDestinationSynchronousMessageSender">
+				<property name="destinationName" value="liferay/workflow_engine" />
+				<property name="synchronousMessageSender" ref="com.liferay.portal.kernel.messaging.sender.DirectSynchronousMessageSender" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="com.liferay.portal.workflow.WorkflowInstanceManagerProxyBean" class="com.liferay.portal.workflow.WorkflowInstanceManagerProxyBean">
+		<property name="singleDestinationSynchronousMessageSender">
+			<bean class="com.liferay.portal.kernel.messaging.sender.DefaultSingleDestinationSynchronousMessageSender">
+				<property name="destinationName" value="liferay/workflow_instance" />
+				<property name="synchronousMessageSender" ref="com.liferay.portal.kernel.messaging.sender.DirectSynchronousMessageSender" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="com.liferay.portal.workflow.WorkflowLogManagerProxyBean" class="com.liferay.portal.workflow.WorkflowLogManagerProxyBean">
+		<property name="singleDestinationSynchronousMessageSender">
+			<bean class="com.liferay.portal.kernel.messaging.sender.DefaultSingleDestinationSynchronousMessageSender">
+				<property name="destinationName" value="liferay/workflow_log" />
+				<property name="synchronousMessageSender" ref="com.liferay.portal.kernel.messaging.sender.DirectSynchronousMessageSender" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="com.liferay.portal.workflow.WorkflowStatusManagerProxyBean" class="com.liferay.portal.workflow.WorkflowStatusManagerProxyBean">
+		<property name="singleDestinationMessageSender">
+			<bean class="com.liferay.portal.kernel.messaging.sender.DefaultSingleDestinationMessageSender">
+				<property name="destinationName" value="liferay/workflow_status" />
+				<property name="messageSender" ref="com.liferay.portal.kernel.messaging.sender.MessageSender" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="com.liferay.portal.workflow.WorkflowTaskManagerProxyBean" class="com.liferay.portal.workflow.WorkflowTaskManagerProxyBean">
+		<property name="singleDestinationSynchronousMessageSender">
+			<bean class="com.liferay.portal.kernel.messaging.sender.DefaultSingleDestinationSynchronousMessageSender">
+				<property name="destinationName" value="liferay/workflow_task" />
+				<property name="synchronousMessageSender" ref="com.liferay.portal.kernel.messaging.sender.DirectSynchronousMessageSender" />
+			</bean>
+		</property>
+	</bean>
+
+	<!-- Util -->
+
+	<bean class="com.liferay.portal.kernel.workflow.WorkflowDefinitionManagerUtil">
+		<property name="workflowDefinitionManager" ref="com.liferay.portal.workflow.WorkflowDefinitionManagerProxyBean" />
+	</bean>
+	<bean class="com.liferay.portal.kernel.workflow.WorkflowEngineManagerUtil">
+		<property name="workflowEngineManager" ref="com.liferay.portal.workflow.WorkflowEngineManagerProxyBean" />
+	</bean>
+	<bean class="com.liferay.portal.kernel.workflow.WorkflowInstanceManagerUtil">
+		<property name="workflowInstanceManager" ref="com.liferay.portal.workflow.WorkflowInstanceManagerProxyBean" />
+	</bean>
+	<bean class="com.liferay.portal.kernel.workflow.WorkflowLogManagerUtil">
+		<property name="workflowLogManager" ref="com.liferay.portal.workflow.WorkflowLogManagerProxyBean" />
+	</bean>
+	<bean class="com.liferay.portal.kernel.workflow.WorkflowStatusManagerUtil">
+		<property name="workflowStatusManager" ref="com.liferay.portal.workflow.WorkflowStatusManagerProxyBean" />
+	</bean>
+	<bean class="com.liferay.portal.kernel.workflow.WorkflowTaskManagerUtil">
+		<property name="workflowTaskManager" ref="com.liferay.portal.workflow.WorkflowTaskManagerProxyBean" />
+	</bean>
+
+	<!-- Messaging -->
+
+	<bean id="destination.workflow_definition" class="com.liferay.portal.kernel.messaging.SynchronousDestination">
+		<property name="name" value="liferay/workflow_definition" />
+	</bean>
+	<bean id="destination.workflow_engine" class="com.liferay.portal.kernel.messaging.SynchronousDestination">
+		<property name="name" value="liferay/workflow_engine" />
+	</bean>
+	<bean id="destination.workflow_instance" class="com.liferay.portal.kernel.messaging.SynchronousDestination">
+		<property name="name" value="liferay/workflow_instance" />
+	</bean>
+	<bean id="destination.workflow_log" class="com.liferay.portal.kernel.messaging.SynchronousDestination">
+		<property name="name" value="liferay/workflow_log" />
+	</bean>
+	<bean id="destination.workflow_status" class="com.liferay.portal.kernel.messaging.SerialDestination">
+		<property name="name" value="liferay/workflow_status" />
+	</bean>
+	<bean id="destination.workflow_task" class="com.liferay.portal.kernel.messaging.SynchronousDestination">
+		<property name="name" value="liferay/workflow_task" />
+	</bean>
+	<bean id="messageListener.workflow_status" class="com.liferay.portal.kernel.messaging.proxy.ProxyMessageListener">
+		<property name="manager">
+			<bean class="com.liferay.portal.workflow.WorkflowStatusManagerImpl" />
+		</property>
+	</bean>
+	<bean id="messagingConfigurator.workflow" class="com.liferay.portal.kernel.messaging.config.DefaultMessagingConfigurator">
+		<property name="destinations">
+			<list>
+				<ref bean="destination.workflow_definition" />
+				<ref bean="destination.workflow_engine" />
+				<ref bean="destination.workflow_instance" />
+				<ref bean="destination.workflow_log" />
+				<ref bean="destination.workflow_status" />
+				<ref bean="destination.workflow_task" />
+			</list>
+		</property>
+		<property name="messageBus">
+			<ref bean="com.liferay.portal.kernel.messaging.MessageBus" />
+		</property>
+		<property name="messageListeners">
+			<map key-type="java.lang.String" value-type="java.util.List">
+				<entry key="liferay/workflow_status">
+					<list value-type="com.liferay.portal.kernel.messaging.MessageListener">
+						<ref bean="messageListener.workflow_status" />
+					</list>
+				</entry>
+			</map>
+		</property>
+	</bean>
+</beans>

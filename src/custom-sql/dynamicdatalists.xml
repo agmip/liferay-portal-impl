@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+
+<custom-sql>
+	<sql id="com.liferay.portlet.dynamicdatalists.service.persistence.DDLRecordFinder.countByR_S">
+		<![CDATA[
+			SELECT
+				COUNT(DISTINCT DDLRecord.recordId) AS COUNT_VALUE
+			FROM
+				DDLRecord
+			INNER JOIN
+				DDLRecordVersion ON
+					(DDLRecordVersion.recordId = DDLRecord.recordId)
+			WHERE
+				(DDLRecordVersion.status = ?) AND
+				(DDLRecord.recordSetId = ?)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.dynamicdatalists.service.persistence.DDLRecordFinder.findByR_S">
+		<![CDATA[
+			SELECT
+				DISTINCT {DDLRecord.*}
+			FROM
+				DDLRecord
+			INNER JOIN
+				DDLRecordVersion ON
+					(DDLRecordVersion.recordId = DDLRecord.recordId)
+			WHERE
+				(DDLRecordVersion.status = ?) AND
+				(DDLRecord.recordSetId = ?)
+			ORDER BY
+				DDLRecord.recordId DESC
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.dynamicdatalists.service.persistence.DDLRecordSetFinder.countByC_G_N_D_S">
+		<![CDATA[
+			SELECT
+				COUNT(DISTINCT recordSetId) AS COUNT_VALUE
+			FROM
+				DDLRecordSet
+			WHERE
+				(companyId = ?) AND
+				(groupId = ?) AND
+				(scope = ?) AND
+				(
+					(lower(name) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(description LIKE ? [$AND_OR_NULL_CHECK$])
+				)
+		]]>
+	</sql>
+	<sql id="com.liferay.portlet.dynamicdatalists.service.persistence.DDLRecordSetFinder.findByC_G_N_D_S">
+		<![CDATA[
+			SELECT
+				{DDLRecordSet.*}
+			FROM
+				DDLRecordSet
+			WHERE
+				(companyId = ?) AND
+				(groupId = ?) AND
+				(scope = ?) AND
+				(
+					(lower(name) LIKE ? [$AND_OR_NULL_CHECK$]) [$AND_OR_CONNECTOR$]
+					(description LIKE ? [$AND_OR_NULL_CHECK$])
+				)
+			ORDER BY
+				DDLRecordSet.recordSetId DESC
+		]]>
+	</sql>
+</custom-sql>

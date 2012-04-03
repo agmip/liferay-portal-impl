@@ -1,0 +1,89 @@
+/**
+ * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+
+package com.liferay.portal.sharepoint.methods;
+
+import com.liferay.portal.sharepoint.Property;
+import com.liferay.portal.sharepoint.ResponseElement;
+import com.liferay.portal.sharepoint.SharepointRequest;
+import com.liferay.portal.sharepoint.SharepointStorage;
+import com.liferay.portal.sharepoint.Tree;
+import com.liferay.portlet.documentlibrary.NoSuchFileEntryException;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Bruno Farache
+ */
+public class GetDocsMetaInfoMethodImpl extends BaseMethodImpl {
+
+	public String getMethodName() {
+		return _METHOD_NAME;
+	}
+
+	@Override
+	public String getRootPath(SharepointRequest sharepointRequest) {
+		String urlList = sharepointRequest.getParameterValue("url_list");
+
+		urlList = urlList.substring(1, urlList.length() - 1);
+
+		int pos = urlList.lastIndexOf("sharepoint/");
+
+		if (pos != -1) {
+			urlList = urlList.substring(pos + 11);
+		}
+
+		return urlList;
+	}
+
+	@Override
+	protected List<ResponseElement> getElements(
+			SharepointRequest sharepointRequest)
+		throws Exception {
+
+		List<ResponseElement> elements = new ArrayList<ResponseElement>();
+
+		SharepointStorage storage = sharepointRequest.getSharepointStorage();
+
+		Tree documentListTree = new Tree();
+
+		try {
+			documentListTree.addChild(
+				storage.getDocumentTree(sharepointRequest));
+		}
+		catch (Exception e1) {
+			if (e1 instanceof NoSuchFileEntryException) {
+				try {
+					documentListTree.addChild(
+						storage.getFolderTree(sharepointRequest));
+				}
+				catch (Exception e2) {
+				}
+			}
+		}
+
+		Property documentProperty = new Property(
+			"document_list", documentListTree);
+
+		elements.add(documentProperty);
+
+		elements.add(new Property("urldirs", new Tree()));
+
+		return elements;
+	}
+
+	private static final String _METHOD_NAME = "getDocsMetaInfo";
+
+}

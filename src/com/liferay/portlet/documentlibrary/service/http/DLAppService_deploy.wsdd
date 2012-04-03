@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+
+<deployment xmlns="http://xml.apache.org/axis/wsdd/" xmlns:java="http://xml.apache.org/axis/wsdd/providers/java">
+	<service name="Portlet_DL_DLAppService" provider="java:RPC" style="rpc" use="encoded">
+		<arrayMapping xmlns:ns="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:cmp-ns="http://www.w3.org/2001/XMLSchema" qname="ns:ArrayOf_xsd_long" type="java:long[]" innerType="cmp-ns:long" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"></arrayMapping>
+		<arrayMapping xmlns:ns="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:cmp-ns="http://www.w3.org/2001/XMLSchema" qname="ns:ArrayOf_xsd_string" type="java:java.lang.String[]" innerType="cmp-ns:string" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"></arrayMapping>
+		<typeMapping xmlns:ns="http://model.documentlibrary.portlet.liferay.com" qname="ns:DLFileShortcutSoap" type="java:com.liferay.portlet.documentlibrary.model.DLFileShortcutSoap" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"></typeMapping>
+		<typeMapping xmlns:ns="http://model.portal.liferay.com" qname="ns:PortletPreferencesIds" type="java:com.liferay.portal.model.PortletPreferencesIds" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"></typeMapping>
+		<typeMapping xmlns:ns="http://service.portal.liferay.com" qname="ns:ServiceContext" type="java:com.liferay.portal.service.ServiceContext" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"></typeMapping>
+		<typeMapping xmlns:ns="http://xml.apache.org/xml-soap" qname="ns:mapItem" type="java:org.apache.xml.xml_soap.MapItem" serializer="org.apache.axis.encoding.ser.BeanSerializerFactory" deserializer="org.apache.axis.encoding.ser.BeanDeserializerFactory" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"></typeMapping>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://model.documentlibrary.portlet.liferay.com" name="addFileShortcut" qname="operNS:addFileShortcut" returnQName="addFileShortcutReturn" returnType="rtns:DLFileShortcutSoap" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="toFileEntryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://service.portal.liferay.com" qname="serviceContext" type="tns:ServiceContext"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="cancelCheckOut" qname="operNS:cancelCheckOut" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileEntryId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="checkInFileEntry" qname="operNS:checkInFileEntry" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileEntryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="majorVersion" type="tns:boolean"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="changeLog" type="tns:string"></parameter>
+			<parameter xmlns:tns="http://service.portal.liferay.com" qname="serviceContext" type="tns:ServiceContext"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="checkInFileEntry" qname="operNS:checkInFileEntry" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileEntryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="lockUuid" type="tns:string"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="checkOutFileEntry" qname="operNS:checkOutFileEntry" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileEntryId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="deleteFileEntryByTitle" qname="operNS:deleteFileEntryByTitle" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="title" type="tns:string"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="deleteFileEntry" qname="operNS:deleteFileEntry" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileEntryId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="deleteFileShortcut" qname="operNS:deleteFileShortcut" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileShortcutId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="deleteFolder" qname="operNS:deleteFolder" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="deleteFolder" qname="operNS:deleteFolder" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="parentFolderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="name" type="tns:string"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="deleteTempFileEntry" qname="operNS:deleteTempFileEntry" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="groupId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileName" type="tns:string"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="tempFolderName" type="tns:string"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="getFileEntriesAndFileShortcutsCount" qname="operNS:getFileEntriesAndFileShortcutsCount" returnQName="getFileEntriesAndFileShortcutsCountReturn" returnType="rtns:int" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="status" type="tns:int"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="getFileEntriesAndFileShortcutsCount" qname="operNS:getFileEntriesAndFileShortcutsCount" returnQName="getFileEntriesAndFileShortcutsCountReturn" returnType="rtns:int" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="status" type="tns:int"></parameter>
+			<parameter xmlns:tns="urn:http.service.documentlibrary.portlet.liferay.com" qname="mimeTypes" type="tns:ArrayOf_xsd_string"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="getFileEntriesCount" qname="operNS:getFileEntriesCount" returnQName="getFileEntriesCountReturn" returnType="rtns:int" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="getFileEntriesCount" qname="operNS:getFileEntriesCount" returnQName="getFileEntriesCountReturn" returnType="rtns:int" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileEntryTypeId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://model.documentlibrary.portlet.liferay.com" name="getFileShortcut" qname="operNS:getFileShortcut" returnQName="getFileShortcutReturn" returnType="rtns:DLFileShortcutSoap" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileShortcutId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="getFoldersAndFileEntriesAndFileShortcutsCount" qname="operNS:getFoldersAndFileEntriesAndFileShortcutsCount" returnQName="getFoldersAndFileEntriesAndFileShortcutsCountReturn" returnType="rtns:int" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="status" type="tns:int"></parameter>
+			<parameter xmlns:tns="urn:http.service.documentlibrary.portlet.liferay.com" qname="mimeTypes" type="tns:ArrayOf_xsd_string"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="includeMountFolders" type="tns:boolean"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="getFoldersAndFileEntriesAndFileShortcutsCount" qname="operNS:getFoldersAndFileEntriesAndFileShortcutsCount" returnQName="getFoldersAndFileEntriesAndFileShortcutsCountReturn" returnType="rtns:int" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="status" type="tns:int"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="includeMountFolders" type="tns:boolean"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="getFoldersCount" qname="operNS:getFoldersCount" returnQName="getFoldersCountReturn" returnType="rtns:int" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="parentFolderId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="getFoldersCount" qname="operNS:getFoldersCount" returnQName="getFoldersCountReturn" returnType="rtns:int" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="parentFolderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="includeMountFolders" type="tns:boolean"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="getFoldersFileEntriesCount" qname="operNS:getFoldersFileEntriesCount" returnQName="getFoldersFileEntriesCountReturn" returnType="rtns:int" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="urn:http.service.documentlibrary.portlet.liferay.com" qname="folderIds" type="tns:ArrayOf_xsd_long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="status" type="tns:int"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="getGroupFileEntriesCount" qname="operNS:getGroupFileEntriesCount" returnQName="getGroupFileEntriesCountReturn" returnType="rtns:int" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="groupId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="userId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="getGroupFileEntriesCount" qname="operNS:getGroupFileEntriesCount" returnQName="getGroupFileEntriesCountReturn" returnType="rtns:int" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="groupId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="userId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="rootFolderId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="getGroupFileEntriesCount" qname="operNS:getGroupFileEntriesCount" returnQName="getGroupFileEntriesCountReturn" returnType="rtns:int" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="groupId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="userId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="rootFolderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="urn:http.service.documentlibrary.portlet.liferay.com" qname="mimeTypes" type="tns:ArrayOf_xsd_string"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="status" type="tns:int"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="getMountFoldersCount" qname="operNS:getMountFoldersCount" returnQName="getMountFoldersCountReturn" returnType="rtns:int" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="parentFolderId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="getSubfolderIds" qname="operNS:getSubfolderIds" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="urn:http.service.documentlibrary.portlet.liferay.com" qname="folderIds" type="tns:ArrayOf_xsd_long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:tns2="http://www.w3.org/2001/XMLSchema" name="getSubfolderIds" qname="operNS:getSubfolderIds" returnQName="getSubfolderIdsReturn" returnType="rtns:ArrayOf_xsd_long" returnItemType="tns2:long" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:tns2="http://www.w3.org/2001/XMLSchema" name="getSubfolderIds" qname="operNS:getSubfolderIds" returnQName="getSubfolderIdsReturn" returnType="rtns:ArrayOf_xsd_long" returnItemType="tns2:long" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="recurse" type="tns:boolean"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:tns2="http://www.w3.org/2001/XMLSchema" name="getTempFileEntryNames" qname="operNS:getTempFileEntryNames" returnQName="getTempFileEntryNamesReturn" returnType="rtns:ArrayOf_xsd_string" returnItemType="tns2:string" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="groupId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="tempFolderName" type="tns:string"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="revertFileEntry" qname="operNS:revertFileEntry" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileEntryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="version" type="tns:string"></parameter>
+			<parameter xmlns:tns="http://service.portal.liferay.com" qname="serviceContext" type="tns:ServiceContext"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="unlockFileEntry" qname="operNS:unlockFileEntry" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileEntryId" type="tns:long"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="unlockFileEntry" qname="operNS:unlockFileEntry" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileEntryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="lockUuid" type="tns:string"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="unlockFolder" qname="operNS:unlockFolder" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="lockUuid" type="tns:string"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" name="unlockFolder" qname="operNS:unlockFolder" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="parentFolderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="name" type="tns:string"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="lockUuid" type="tns:string"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://model.documentlibrary.portlet.liferay.com" name="updateFileShortcut" qname="operNS:updateFileShortcut" returnQName="updateFileShortcutReturn" returnType="rtns:DLFileShortcutSoap" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileShortcutId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="toFileEntryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://service.portal.liferay.com" qname="serviceContext" type="tns:ServiceContext"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="verifyFileEntryCheckOut" qname="operNS:verifyFileEntryCheckOut" returnQName="verifyFileEntryCheckOutReturn" returnType="rtns:boolean" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileEntryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="lockUuid" type="tns:string"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="verifyFileEntryLock" qname="operNS:verifyFileEntryLock" returnQName="verifyFileEntryLockReturn" returnType="rtns:boolean" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="fileEntryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="lockUuid" type="tns:string"></parameter>
+		</operation>
+		<operation xmlns:operNS="urn:http.service.documentlibrary.portlet.liferay.com" xmlns:rtns="http://www.w3.org/2001/XMLSchema" name="verifyInheritableLock" qname="operNS:verifyInheritableLock" returnQName="verifyInheritableLockReturn" returnType="rtns:boolean" soapAction="">
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="repositoryId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="folderId" type="tns:long"></parameter>
+			<parameter xmlns:tns="http://www.w3.org/2001/XMLSchema" qname="lockUuid" type="tns:string"></parameter>
+		</operation>
+		<parameter name="allowedMethods" value="addFileShortcut cancelCheckOut checkInFileEntry checkOutFileEntry deleteFileEntry deleteFileEntryByTitle deleteFileShortcut deleteFolder deleteTempFileEntry getFileEntriesAndFileShortcutsCount getFileEntriesCount getFileShortcut getFoldersAndFileEntriesAndFileShortcutsCount getFoldersCount getFoldersFileEntriesCount getGroupFileEntriesCount getMountFoldersCount getSubfolderIds getTempFileEntryNames revertFileEntry unlockFileEntry unlockFolder updateFileShortcut verifyFileEntryCheckOut verifyFileEntryLock verifyInheritableLock" />
+		<parameter name="className" value="com.liferay.portlet.documentlibrary.service.http.DLAppServiceSoap" />
+		<parameter name="schemaUnqualified" value="http://model.documentlibrary.portlet.liferay.com,http://model.portal.liferay.com,http://service.portal.liferay.com,http://xml.apache.org/xml-soap,urn:http.service.documentlibrary.portlet.liferay.com" />
+		<parameter name="typeMappingVersion" value="1.2" />
+		<parameter name="wsdlPortType" value="DLAppServiceSoap" />
+		<parameter name="wsdlServiceElement" value="DLAppServiceSoapService" />
+		<parameter name="wsdlServicePort" value="Portlet_DL_DLAppService" />
+		<parameter name="wsdlTargetNamespace" value="urn:http.service.documentlibrary.portlet.liferay.com" />
+	</service>
+</deployment>

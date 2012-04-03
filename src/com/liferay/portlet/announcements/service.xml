@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 6.1.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_6_1_0.dtd">
+
+<service-builder package-path="com.liferay.portlet.announcements">
+	<namespace>Announcements</namespace>
+	<entity name="AnnouncementsDelivery" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="deliveryId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+
+		<!-- Other fields -->
+
+		<column name="type" type="String" />
+		<column name="email" type="boolean" />
+		<column name="sms" type="boolean" />
+		<column name="website" type="boolean" />
+
+		<!-- Finder methods -->
+
+		<finder name="UserId" return-type="Collection">
+			<finder-column name="userId" />
+		</finder>
+		<finder name="U_T" return-type="AnnouncementsDelivery" unique="true">
+			<finder-column name="userId" />
+			<finder-column name="type" />
+		</finder>
+	</entity>
+	<entity name="AnnouncementsEntry" uuid="true" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="entryId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="classNameId" type="long" />
+		<column name="classPK" type="long" />
+		<column name="title" type="String" />
+		<column name="content" type="String" />
+		<column name="url" type="String" />
+		<column name="type" type="String" />
+		<column name="displayDate" type="Date" />
+		<column name="expirationDate" type="Date" />
+		<column name="priority" type="int" />
+		<column name="alert" type="boolean" />
+
+		<!-- Order -->
+
+		<order by="asc">
+			<order-column name="priority" />
+			<order-column name="modifiedDate" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="UserId" return-type="Collection">
+			<finder-column name="userId" />
+		</finder>
+		<finder name="C_C" return-type="Collection">
+			<finder-column name="classNameId" />
+			<finder-column name="classPK" />
+		</finder>
+		<finder name="C_C_A" return-type="Collection">
+			<finder-column name="classNameId" />
+			<finder-column name="classPK" />
+			<finder-column name="alert" />
+		</finder>
+
+		<!-- References -->
+
+		<reference package-path="com.liferay.mail" entity="Mail" />
+		<reference package-path="com.liferay.portal" entity="Company" />
+		<reference package-path="com.liferay.portal" entity="Group" />
+		<reference package-path="com.liferay.portal" entity="Organization" />
+		<reference package-path="com.liferay.portal" entity="Role" />
+		<reference package-path="com.liferay.portal" entity="UserGroup" />
+	</entity>
+	<entity name="AnnouncementsFlag" local-service="true" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="flagId" type="long" primary="true" />
+
+		<!-- Audit fields -->
+
+		<column name="userId" type="long" />
+		<column name="createDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<column name="entryId" type="long" />
+		<column name="value" type="int" />
+
+		<!-- Order -->
+
+		<order by="asc">
+			<order-column name="userId" />
+			<order-column name="createDate" />
+		</order>
+
+		<!-- Finder methods -->
+
+		<finder name="EntryId" return-type="Collection">
+			<finder-column name="entryId" />
+		</finder>
+		<finder name="U_E_V" return-type="AnnouncementFlag" unique="true">
+			<finder-column name="userId" />
+			<finder-column name="entryId" />
+			<finder-column name="value" />
+		</finder>
+	</entity>
+	<exceptions>
+		<exception>EntryContent</exception>
+		<exception>EntryDisplayDate</exception>
+		<exception>EntryExpirationDate</exception>
+		<exception>EntryTitle</exception>
+		<exception>EntryURL</exception>
+	</exceptions>
+</service-builder>
